@@ -1,0 +1,18 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+flask-restful = "*"
+flask = "*"
+codecov = "*"
+pytest = "*"
+pytest-cov = "*"
+flask-sqlalchemy = "*"
+pytest-flask = "*"
+
+[dev-packages]
+
+[requires]
+python_version = "3.7"
