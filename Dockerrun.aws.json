@@ -1,0 +1,71 @@
+{
+    "containerDefinitions": [
+        {
+            "environment": [
+                {
+                    "name": "config",
+                    "value": "development"
+                }
+            ],
+            "essential": true,
+            "image": "alcaster/pragaleriabackend",
+            "mountPoints": [
+                {
+                    "containerPath": "/opt",
+                    "sourceVolume": "_Src"
+                }
+            ],
+            "name": "backend",
+            "memory": 256,
+            "portMappings": [
+                {
+                    "containerPort": 5000,
+                    "hostPort": 5000
+                }
+            ]
+        },
+        {
+            "environment": [
+                {
+                    "name": "MYSQL_ROOT_PASSWORD",
+                    "value": "Password12#"
+                },
+                {
+                    "name": "MYSQL_DATABASE",
+                    "value": "pragaleroe1"
+                }
+            ],
+            "essential": true,
+            "image": "mysql:5.6.40",
+            "mountPoints": [
+                {
+                    "containerPath": "/docker-entrypoint-initdb.d/init.sql",
+                    "sourceVolume": "_DbInit_Sql"
+                }
+            ],
+            "name": "db",
+            "memory": 512,
+            "portMappings": [
+                {
+                    "containerPort": 3306,
+                    "hostPort": 3306
+                }
+            ]
+        }
+    ],
+    "family": "",
+    "volumes": [
+        {
+            "host": {
+                "sourcePath": "./src"
+            },
+            "name": "_Src"
+        },
+        {
+            "host": {
+                "sourcePath": "./db/init.sql"
+            },
+            "name": "_DbInit_Sql"
+        }
+    ]
+}

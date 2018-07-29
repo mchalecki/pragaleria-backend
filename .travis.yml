@@ -1,0 +1,20 @@
+sudo: required
+
+language: python
+
+services:
+  - docker
+
+before_install:
+  - sudo service mysql stop
+  - wget --no-check-certificate 'https://docs.google.com/uc?export=download&id='$DBGDRIVEID -O db/init.sql
+  - docker-compose up -d db
+  - docker-compose build backend
+
+script:
+  - docker-compose run --entrypoint /bin/bash backend -c "pytest app/tests"
+
+before_deploy:
+  - docker login -u "$REGISTRY_USER" -p "$REGISTRY_PASS"
+  - docker tag pragaleriabackend_backend:latest $REGISTRY_USER/pragaleriabackend
+  - docker push $REGISTRY_USER/pragaleriabackend
