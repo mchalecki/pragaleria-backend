@@ -22,8 +22,10 @@ def create_app(config_name):
 
 
 def _register_blueprints(app):
+    from app.resources.api import api_bl
     from app.resources.mocks import mocks_bl
     from app.resources.test import test_bl
 
+    app.register_blueprint(api_bl)
     app.register_blueprint(test_bl)
     app.register_blueprint(mocks_bl)
