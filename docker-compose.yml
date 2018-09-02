@@ -8,6 +8,8 @@ services:
       - './src:/opt'
     environment:
       - config=development
+      - MYSQL_ROOT_PASSWORD=Password12#
+      - MYSQL_DATABASE=pragaleroe1
   db:
     image: mysql:5.6.40
     ports:

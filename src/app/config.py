@@ -8,7 +8,10 @@ class Config:
     DEBUG = False
     CSRF_ENABLED = True
     SECRET = os.getenv('SECRET')
-    SQLALCHEMY_DATABASE_URI = 'mysql+mysqldb://db'
+    SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://root:{}@pragaleria-backend_db_1/{}?charset=utf8&use_unicode=0'.format(
+        os.getenv('MYSQL_ROOT_PASSWORD'),
+        os.getenv('MYSQL_DATABASE'),
+    )
 
 
 class DevelopmentConfig(Config):
