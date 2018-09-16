@@ -9,6 +9,10 @@ from sqlalchemy import not_
 
 from app.models import models
 
+
+PRAGALERIA_UPLOAD_URL = 'http://pragaleria.pl/wp-content/uploads/'
+PRAGALERIA_AUCTIONS_URL = 'http://pragaleria.pl/aukcje-wystawy/'
+
 api_bl = Blueprint('api', __name__, url_prefix='/api')
 api = Api(api_bl)
 
@@ -33,16 +37,7 @@ class PostsBaseApi(Resource):
             abort(404, message='Error querying Posts. {}'.format(e))
     
     def _build_data_list(self):
-        result = []
-        for parent in self._query_posts():
-            revision = models.Posts.query.filter_by(
-                post_parent=parent.id
-            ).order_by(models.Posts.post_modified.desc()).first()
-            data = revision or parent
-            if data.post_title and data.post_excerpt:
-                result.append(self._build_post(parent, revision))
-
-        return result
+        raise NotImplementedError
 
     def _query_posts(self):
         raise NotImplementedError
@@ -54,8 +49,9 @@ class PostsBaseApi(Resource):
 
         post_data['id'] = data.id
         post_data['title'] = data.post_title
-        post_data['description'] = data.post_excerpt
-        post_data['guid'] = data.guid
+        post_data['description_content'] = data.post_content
+        post_data['description_excerpt'] = data.post_excerpt
+        post_data['guid'] = f'{PRAGALERIA_AUCTIONS_URL}{parent.post_name}'
         post_data['date'] = str(data.post_modified)
 
         post_data['auction_start'] = self._query_postmeta_by_key(
@@ -64,6 +60,8 @@ class PostsBaseApi(Resource):
             parent.id, 'aukcja_end')
         post_data['auction_status'] = self._query_postmeta_by_key(
             parent.id, 'aukcja_status')
+
+        post_data['thumbnail'] = self._get_thumbnail(parent.id)
 
         return post_data
 
@@ -76,6 +74,21 @@ class PostsBaseApi(Resource):
         if result:
             return result.meta_value
 
+    def _get_thumbnail(self, item_id):
+        thumbnail_id = models.Postmeta.query.filter_by(
+            post_id=item_id,
+            meta_key='_thumbnail_id'
+        ).first()
+
+        if thumbnail_id:
+            thumbnail = models.Postmeta.query.filter_by(
+                post_id=thumbnail_id.meta_value,
+                meta_key='_wp_attached_file'
+            ).first()
+
+            if thumbnail:
+                return f'{PRAGALERIA_UPLOAD_URL}{thumbnail.meta_value}'
+
 
 class Auctions(PostsBaseApi):
     def _query_posts(self):
@@ -85,11 +98,23 @@ class Auctions(PostsBaseApi):
             models.Posts.post_name.like('%aukcja%')
         ).order_by(models.Posts.post_modified.desc())
 
+    def _build_data_list(self):
+        result = []
+        for parent in self._query_posts():
+            revision = models.Posts.query.filter_by(
+                post_parent=parent.id
+            ).order_by(models.Posts.post_modified.desc()).first()
+            data = revision or parent
+            if data.post_title and (data.post_excerpt or data.post_content):
+                result.append(self._build_post(parent, revision))
+
+        return result
+
 
 class Exhibitions(PostsBaseApi):
     def _query_posts(self):
         return models.Posts.query.filter(
-            models.Posts.guid.like('%aukcje-wystawy%'),
+            models.Posts.guid.like('%/aukcje-wystawy/%'),
             models.Posts.post_status == 'publish'
         ).filter(
             not_(
@@ -97,8 +122,16 @@ class Exhibitions(PostsBaseApi):
             )
         ).order_by(models.Posts.post_modified.desc())
 
+    def _build_data_list(self):
+        result = []
+        for parent in self._query_posts():
+            if parent.post_title:
+                result.append(self._build_post(parent, parent))
 
-class AuctionCatalog(Resource):
+        return result
+
+
+class Catalog(Resource):
     def get(self, auction_id):
         try:
             catalog = self._get_auction_catalog(auction_id)
@@ -140,11 +173,20 @@ class AuctionCatalog(Resource):
         auction_item['title'] = item_post.post_title
         auction_item['description'] = item_post.post_content
 
-        auction_item['catalog_number'] = data[b'katalog_nr'].decode()
-        auction_item['initial_price'] = data[b'cena_wywolawcza'].decode()
-        auction_item['sold_price'] = data[b'cena_sprzedazy'].decode()
-        auction_item['after_auction_price'] = data[b'cena_poaukcyjna'].decode()
-        auction_item['sold'] = data[b'sprzedana'].decode()
+        if data[b'katalog_nr']:
+            auction_item['catalog_number'] = data[b'katalog_nr'].decode()
+
+        if data[b'cena_wywolawcza']:
+            auction_item['initial_price'] = data[b'cena_wywolawcza'].decode()
+
+        if data[b'cena_sprzedazy']:
+            auction_item['sold_price'] = data[b'cena_sprzedazy'].decode()
+
+        if data[b'cena_poaukcyjna']:
+            auction_item['after_auction_price'] = data[b'cena_poaukcyjna'].decode()
+
+        if data[b'sprzedana']:
+            auction_item['sold'] = data[b'sprzedana'].decode()
 
         auction_item['thumbnail'] = self._get_auction_item_url(item_id)
         auction_item['author'] = self._get_auction_item_author(item_id)
@@ -164,7 +206,7 @@ class AuctionCatalog(Resource):
             ).first()
 
             if thumbnail:
-                return f'http://pragaleria.pl/wp-content/uploads/{thumbnail.meta_value}'
+                return f'{PRAGALERIA_UPLOAD_URL}{thumbnail.meta_value}'
 
     def _get_auction_item_author(self, item_id):
         relationships = models.TermRelationships.query.filter_by(
@@ -194,25 +236,25 @@ class Terms(Resource):
                 result.append({
                     'id': term.term_id,
                     'name': term.name,
-                    'description': get_term_description(term.term_id)
+                    'description': self.get_term_description(term.term_id)
                 })
         return result
 
 
-def get_term_description(term_id):
-    try:
-        term_taxonomy = models.TermTaxonomies.query.filter_by(
-            term_id=term_id
-        ).first()
-        if term_taxonomy.taxonomy == 'autor':
-            return term_taxonomy.description
-    except Exception as e:
-        pass
-    else:
-        return ''
+    def get_term_description(self, term_id):
+        try:
+            term_taxonomy = models.TermTaxonomies.query.filter_by(
+                term_id=term_id
+            ).first()
+            if term_taxonomy.taxonomy == 'autor':
+                return term_taxonomy.description
+        except Exception as e:
+            pass
+        else:
+            return ''
 
 
 api.add_resource(Terms, '/terms')
 api.add_resource(Auctions, '/auctions')
-api.add_resource(AuctionCatalog, '/auctions/<string:auction_id>')
 api.add_resource(Exhibitions, '/exhibitions')
+api.add_resource(Catalog, '/catalog/<string:auction_id>')
