@@ -4,6 +4,7 @@ import phpserialize as php
 from flask import Blueprint, make_response
 from flask_restful import Resource, Api, abort
 from sqlalchemy.sql import func
+from sqlalchemy import not_
 
 from app.models import models
 
@@ -23,51 +24,47 @@ def output_json(data, code, headers=None):
     return resp
 
 
-class Auctions(Resource):
+class PostsBaseApi(Resource):
     def get(self):
         try:
-            return self._build_auctions_list()
+            return self._build_data_list()
         except Exception as e:
             abort(404, message='Error querying Posts. {}'.format(e))
-
-    def _build_auctions_list(self):
+    
+    def _build_data_list(self):
         result = []
-        for parent in self._query_auctions():
+        for parent in self._query_posts():
             revision = models.Posts.query.filter_by(
                 post_parent=parent.id
             ).order_by(models.Posts.post_modified.desc()).first()
             data = revision or parent
             if data.post_title and data.post_excerpt:
-                result.append(self._build_auction(parent, revision))
+                result.append(self._build_post(parent, revision))
 
         return result
 
-    def _query_auctions(self):
-        return models.Posts.query.filter(
-            models.Posts.guid.like('%aukcje-wystawy%')
-        ).filter(
-            models.Posts.post_name.like('%aukcja%')
-        ).order_by(models.Posts.post_modified.desc())
+    def _query_posts(self):
+        raise NotImplementedError
 
-    def _build_auction(self, parent, revision):
-        auction_data = {}
+    def _build_post(self, parent, revision):
+        post_data = {}
 
         data = revision or parent
 
-        auction_data['id'] = data.id
-        auction_data['title'] = data.post_title
-        auction_data['description'] = data.post_excerpt
-        auction_data['guid'] = data.guid
-        auction_data['date'] = str(data.post_modified)
+        post_data['id'] = data.id
+        post_data['title'] = data.post_title
+        post_data['description'] = data.post_excerpt
+        post_data['guid'] = data.guid
+        post_data['date'] = str(data.post_modified)
 
-        auction_data['auction_start'] = self._query_postmeta_by_key(
+        post_data['auction_start'] = self._query_postmeta_by_key(
             parent.id, 'aukcja_start')
-        auction_data['auction_end'] = self._query_postmeta_by_key(
+        post_data['auction_end'] = self._query_postmeta_by_key(
             parent.id, 'aukcja_end')
-        auction_data['auction_status'] = self._query_postmeta_by_key(
+        post_data['auction_status'] = self._query_postmeta_by_key(
             parent.id, 'aukcja_status')
 
-        return auction_data
+        return post_data
 
     def _query_postmeta_by_key(self, post_id, key):
         result = models.Postmeta.query.filter_by(
@@ -77,6 +74,27 @@ class Auctions(Resource):
 
         if result:
             return result.meta_value
+
+
+class Auctions(PostsBaseApi):
+    def _query_posts(self):
+        return models.Posts.query.filter(
+            models.Posts.guid.like('%aukcje-wystawy%')
+        ).filter(
+            models.Posts.post_name.like('%aukcja%')
+        ).order_by(models.Posts.post_modified.desc())
+
+
+class Exhibitions(PostsBaseApi):
+    def _query_posts(self):
+        return models.Posts.query.filter(
+            models.Posts.guid.like('%aukcje-wystawy%'),
+            models.Posts.post_status == 'publish'
+        ).filter(
+            not_(
+                models.Posts.post_name.like('%aukcja%')
+            )
+        ).order_by(models.Posts.post_modified.desc())
 
 
 class AuctionCatalog(Resource):
@@ -196,3 +214,4 @@ def get_term_description(term_id):
 api.add_resource(Terms, '/terms')
 api.add_resource(Auctions, '/auctions')
 api.add_resource(AuctionCatalog, '/auctions/<string:auction_id>')
+api.add_resource(Exhibitions, '/exhibitions')
