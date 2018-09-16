@@ -4,8 +4,6 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 
 from app.config import app_config
-from app.resources.mocks import mocks_bl
-from app.resources.test import test_bl
 
 CONFIG_FILE_LOCATION = Path(__file__).parent / "config.py"
 db = SQLAlchemy()

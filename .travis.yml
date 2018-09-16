@@ -18,3 +18,14 @@ before_deploy:
   - docker login -u "$REGISTRY_USER" -p "$REGISTRY_PASS"
   - docker tag pragaleriabackend_backend:latest $REGISTRY_USER/pragaleriabackend
   - docker push $REGISTRY_USER/pragaleriabackend
+deploy:
+  provider: elasticbeanstalk
+  access_key_id: $AWS_ACCESS_KEY_ID
+  secret_access_key:
+    secure: $AWS_SECRET_ACCESS_KEY
+  region: us-east-2
+  app: Pragaleria-backend
+  env: PragaleriaBackend-env
+  bucket_name: elasticbeanstalk-us-east-2-123451151316
+  on:
+    branch: deploy
