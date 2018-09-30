@@ -225,36 +225,59 @@ class Catalog(Resource):
 
 
 class Terms(Resource):
-    def get(self):
+    def get(self, page_number):
         try:
-            all_terms = models.Terms.query.all()
+            result = []
+            author_query = models.TermTaxonomies.query.filter_by(taxonomy='autor')
+            page_size = 20
+            all_pages = len(author_query.all()) // page_size
+            if page_number < 0:
+                page_number = 0
+    
+            if page_number > all_pages:
+                page_number = all_pages
+            
+            current_taxonomies = author_query.limit(page_size).offset(page_number * page_size)
+            for taxonomy in current_taxonomies:
+                author = self._build_author(taxonomy)
+                if author:
+                    result.append(author)
+            return result
         except Exception as e:
             abort(404, message="Error querying Terms. {}".format(e))
-        result = []
-        for term in all_terms:
-            if term.term_id and term.name:
-                result.append({
-                    'id': term.term_id,
-                    'name': term.name,
-                    'description': self.get_term_description(term.term_id)
-                })
-        return result
+    
+    def _build_author(self, taxonomy):
+        term = models.Terms.query.filter_by(term_id=taxonomy.term_id).first()
+        if term:
+            relationship = models.TermRelationships.query.filter_by(
+                term_taxonomy_id=taxonomy.term_taxonomy_id).first()
+            if relationship:
+                thumbnail = self._get_thumbnail(relationship.object_id)
+                if thumbnail:
+                    return {
+                        'id': term.term_id,
+                        'name': term.name,
+                        'slug': term.slug,
+                        'thumbnail': thumbnail
+                    }
 
+    def _get_thumbnail(self, item_id):
+        thumbnail_id = models.Postmeta.query.filter_by(
+            post_id=item_id,
+            meta_key='_thumbnail_id'
+        ).first()
 
-    def get_term_description(self, term_id):
-        try:
-            term_taxonomy = models.TermTaxonomies.query.filter_by(
-                term_id=term_id
+        if thumbnail_id:
+            thumbnail = models.Postmeta.query.filter_by(
+                post_id=thumbnail_id.meta_value,
+                meta_key='_wp_attached_file'
             ).first()
-            if term_taxonomy.taxonomy == 'autor':
-                return term_taxonomy.description
-        except Exception as e:
-            pass
-        else:
-            return ''
+
+            if thumbnail:
+                return f'{PRAGALERIA_UPLOAD_URL}{thumbnail.meta_value}'
 
 
-api.add_resource(Terms, '/terms')
+api.add_resource(Terms, '/terms/<int:page_number>')
 api.add_resource(Auctions, '/auctions')
 api.add_resource(Exhibitions, '/exhibitions')
 api.add_resource(Catalog, '/catalog/<string:auction_id>')
