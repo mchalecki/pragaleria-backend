@@ -11,12 +11,12 @@ class TestBasic:
 
 class TestTerms:
     def test_count(self, client):
-        res = client.get('/api/terms/1/20')
+        res = client.get('/api/authors/1/20')
         data = json.loads(res.data.decode('utf-8'))
         assert len(data) < 21
 
     def test_last_entry(self, client):
-        res = client.get('/api/terms/1/20')
+        res = client.get('/api/authors/1/20')
         data = json.loads(res.data.decode('utf-8'))
         assert data[-1]['name'] == 'Tomek Wojtysek'
 
