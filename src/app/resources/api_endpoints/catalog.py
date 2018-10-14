@@ -2,7 +2,7 @@ import phpserialize as php
 from flask_restful import Resource, abort
 
 from app.models import models
-from consts import PRAGALERIA_UPLOAD_URL
+from app.api_utils import postmeta, phpmeta, thumbnails
 
 
 class Catalog(Resource):
@@ -10,32 +10,16 @@ class Catalog(Resource):
         catalog = self._get_auction_catalog(auction_id)
 
         result = []
-        for data in self._php_meta_to_dict(catalog).values():
+        for data in phpmeta.to_dict(catalog).values():
             result.append(self._build_auction_item(data))
         return result
 
     def _get_auction_catalog(self, auction_id):
-        catalog = self._query_catalog(auction_id)
+        catalog = postmeta.by_key(auction_id, 'katalog')
         if catalog is None:
             auction = models.Posts.query.filter_by(id=auction_id).first()
-            catalog = self._query_catalog(auction.post_parent)
+            catalog = postmeta.by_key(auction.post_parent, 'katalog')
         return catalog
-
-    @staticmethod
-    def _query_catalog(post_id):
-        return models.Postmeta.query.filter_by(
-            post_id=post_id,
-            meta_key='katalog'
-        ).first()
-
-    @staticmethod
-    def _php_meta_to_dict(meta):
-        return php.loads(
-            php.loads(
-                meta.meta_value.encode(),
-                object_hook=php.phpobject
-            )
-        )
 
     def _build_auction_item(self, data):
         item_id = data[b'id'].decode()
@@ -58,26 +42,10 @@ class Catalog(Resource):
         if data[b'sprzedana']:
             auction_item['sold'] = data[b'sprzedana'].decode()
 
-        auction_item['thumbnail'] = self._get_auction_item_url(item_id)
+        auction_item['thumbnail'] = thumbnails.by_id(item_id)
         auction_item['author'] = self._get_auction_item_author(item_id)
 
         return auction_item
-
-    @staticmethod
-    def _get_auction_item_url(item_id):
-        thumbnail_id = models.Postmeta.query.filter_by(
-            post_id=item_id,
-            meta_key='_thumbnail_id'
-        ).first()
-
-        if thumbnail_id:
-            thumbnail = models.Postmeta.query.filter_by(
-                post_id=thumbnail_id.meta_value,
-                meta_key='_wp_attached_file'
-            ).first()
-
-            if thumbnail:
-                return f'{PRAGALERIA_UPLOAD_URL}{thumbnail.meta_value}'
 
     @staticmethod
     def _get_auction_item_author(item_id):
