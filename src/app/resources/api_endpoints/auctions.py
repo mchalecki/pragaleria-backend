@@ -1,17 +1,8 @@
 from app.models import models
-from app.resources.api_endpoints.postbase import PostsBaseApi
+from app.api_utils import base_post_api
 
 
-class Auctions(PostsBaseApi):
-    def _query_posts(self):
-        return models.Posts.query.filter(
-            models.Posts.guid.like('%aukcje-wystawy%')
-        ).filter(
-            models.Posts.post_name.like('%aukcja%')
-        ).order_by(
-            models.Posts.post_modified.desc()
-        )
-
+class Auctions(base_post_api.BasePostApi):
     def _build_data_list(self):
         result = []
         for parent in self._query_posts():
@@ -23,3 +14,12 @@ class Auctions(PostsBaseApi):
                 result.append(self._build_post(parent, revision))
 
         return result
+
+    def _query_posts(self):
+        return models.Posts.query.filter(
+            models.Posts.id != 18907,  # some fake post
+            models.Posts.guid.like('%aukcje-wystawy%'),
+            models.Posts.post_name.like('%aukcja%')
+        ).order_by(
+            models.Posts.post_modified.desc()
+        )
