@@ -1,7 +1,12 @@
-Pragaleria
-=========
+## Dev environment
 
->
-> Art enables us to find ourselves and lose ourselves at the same time.
->
-> \- Thomas Merton
+
+To setup the development environment you have to run `./dev-setup.sh` (change password!) first. It will create a development database in the repostiory. You have to do it only once.
+
+If you already have pragaleria.sql file in db directory then you run:
+
+`sudo docker-compose up`
+
+
+https://docs.docker.com/install/  
+https://docs.docker.com/compose/install/
