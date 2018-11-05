@@ -27,9 +27,6 @@ class Catalog(Resource):
 
         auction_item = {'id': item_id, 'title': item_post.post_title, 'description': item_post.post_content}
 
-        if data[b'katalog_nr']:
-            auction_item['catalog_number'] = data[b'katalog_nr'].decode()
-
         if data[b'cena_wywolawcza']:
             auction_item['initial_price'] = data[b'cena_wywolawcza'].decode()
 
