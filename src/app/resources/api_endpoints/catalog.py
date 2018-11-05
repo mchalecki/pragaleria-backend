@@ -37,7 +37,7 @@ class Catalog(Resource):
             auction_item['after_auction_price'] = data[b'cena_poaukcyjna'].decode()
 
         if data[b'sprzedana']:
-            auction_item['sold'] = data[b'sprzedana'].decode()
+            auction_item['sold'] = bool(int(data[b'sprzedana'].decode()))
 
         auction_item['thumbnail'] = thumbnails.by_id(item_id)
         auction_item['author'] = self._get_auction_item_author(item_id)

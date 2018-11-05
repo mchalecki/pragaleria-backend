@@ -16,29 +16,42 @@ class TermDetails(Resource):
         if not term_id:
             return None
 
-        term, relationships = self._get_term_with_relationships(term_id)
+        term, relationships, taxonomy = self._get_term_details(term_id)
 
         if term and relationships and len(relationships) > 0:
-            return {
-                'id': term.term_id,
-                'name': term.name,
-                'slug': term.slug,
-                'artworks': list(map(
-                    self._get_author_artwork_from_post,
-                    relationships
-                ))
-            }
+            result = {}
 
-    def _get_term_with_relationships(self, term_id):
+            result['id'] = term_id
+
+            if hasattr(term, 'name'):
+                result['name'] = term.name
+
+            if hasattr(term, 'slug'):
+                result['slug'] = term.slug
+
+            if hasattr(taxonomy, 'description'):
+                result['description'] = taxonomy.description
+
+            artworks = map(self._get_author_artwork_from_post, relationships)
+            if artworks:
+                result['artworks'] = list(artworks)
+
+            return result
+
+    def _get_term_details(self, term_id):
         term = models.Terms.query.filter_by(
             term_id=term_id
         ).first()
 
+        taxonomy = models.TermTaxonomies.query.filter_by(
+            term_id=term_id,
+        ).first()
+
         relationships = models.TermRelationships.query.filter_by(
-            term_taxonomy_id=term_id
+            term_taxonomy_id=taxonomy.term_taxonomy_id
         ).all()
 
-        return term, relationships
+        return term, relationships, taxonomy
 
     def _get_author_artwork_from_post(self, artwork):
         artwork_id = artwork.object_id
@@ -46,16 +59,36 @@ class TermDetails(Resource):
             id=artwork_id
         ).first()
 
+        result = {}
+
         if artwork_post:
-            return {
-                'id': artwork_id,
-                'title': artwork_post.post_title,
-                'description': artwork_post.post_content,
-                'sold': postmeta.by_key(artwork_id, 'oferta_status'),
-                'initial_price': postmeta.by_key(artwork_id, 'oferta_cena'),
-                'price': postmeta.by_key(artwork_id, 'oferta_cena_sprzedazy'),
-                'year': postmeta.by_key(artwork_id, 'oferta_rok'),
-                'thumbnail': thumbnails.by_id(artwork_id)
-            }
-        
-        return {}
+
+            result['id'] = artwork_id
+
+            if hasattr(artwork_post, 'post_title'):
+                result['title'] = artwork_post.post_title
+
+            if hasattr(artwork_post, 'post_content'):
+                result['description'] = artwork_post.post_content
+
+            sold = postmeta.by_key(artwork_id, 'oferta_status')
+            if sold and sold.isdigit():
+                result['description'] = bool(int(sold))
+
+            initial_price = postmeta.by_key(artwork_id, 'oferta_cena')
+            if initial_price:
+                result['initial_price'] = initial_price
+
+            sold_price = postmeta.by_key(artwork_id, 'oferta_cena_sprzedazy')
+            if sold_price:
+                result['sold_price'] = sold_price
+
+            year = postmeta.by_key(artwork_id, 'oferta_rok')
+            if year and year.isdigit():
+                result['year'] = int(year)
+
+            thumbnail = thumbnails.by_id(artwork_id)
+            if thumbnail:
+                result['thumbnail'] = thumbnail
+
+        return result
