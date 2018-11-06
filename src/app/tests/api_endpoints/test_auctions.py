@@ -32,7 +32,7 @@ def test_structure_of_an_auction_object(client):
     assert data['auction_start'] == '2017/04/18 18:45'
     assert data['auction_end'] == '2017/04/25 19:30'
     assert data['auction_status'] == '1'
-    assert data['thumbnail'] == 'http://pragaleria.pl/wp-content/uploads/2017/04/03_Owca-XL-no11-model-Zebrowca-2.jpg'
+    assert data['thumbnail']['original'] == 'http://pragaleria.pl/wp-content/uploads/2017/04/03_Owca-XL-no11-model-Zebrowca-2.jpg'
 
 
 def test_if_when_there_exists_newer_revision_then_it_is_returned_instead(client):
