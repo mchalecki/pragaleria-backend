@@ -12,7 +12,7 @@ def test_all_auctions_satisfy_same_structure(client):
     obligatory_fields = [
         'id', 'description_content', 'guid',
         'date', 'auction_start', 'auction_end',
-        'auction_status', 'thumbnail'
+        'auction_status', 'image_thumbnail'
     ]
     assert all(
         key in obj.keys()
@@ -32,7 +32,7 @@ def test_structure_of_an_auction_object(client):
     assert data['auction_start'] == '2017/04/18 18:45'
     assert data['auction_end'] == '2017/04/25 19:30'
     assert data['auction_status'] == '1'
-    assert data['thumbnail']['original'] == 'http://pragaleria.pl/wp-content/uploads/2017/04/03_Owca-XL-no11-model-Zebrowca-2.jpg'
+    assert data['image_original'] == 'http://pragaleria.pl/wp-content/uploads/2017/04/03_Owca-XL-no11-model-Zebrowca-2.jpg'
 
 
 def test_if_when_there_exists_newer_revision_then_it_is_returned_instead(client):
@@ -69,7 +69,7 @@ def test_if_when_there_exists_newer_revision_then_it_is_returned_instead(client)
     assert auction_obj['auction_start'] == postmeta.by_key(real_parent.id, 'aukcja_start')
     assert auction_obj['auction_end'] == postmeta.by_key(real_parent.id, 'aukcja_end')
     assert auction_obj['auction_status'] == postmeta.by_key(real_parent.id, 'aukcja_status')
-    assert auction_obj['thumbnail'] == thumbnails.by_id(real_parent.id)
+    assert auction_obj['image_thumbnail'] == thumbnails.by_id(real_parent.id)['image_thumbnail']
 
 
 def test_if_when_there_are_no_newer_revisions_then_original_post_is_returned(client):
@@ -100,4 +100,4 @@ def test_if_when_there_are_no_newer_revisions_then_original_post_is_returned(cli
     assert auction_obj['auction_start'] == postmeta.by_key(real_auction_obj.id, 'aukcja_start')
     assert auction_obj['auction_end'] == postmeta.by_key(real_auction_obj.id, 'aukcja_end')
     assert auction_obj['auction_status'] == postmeta.by_key(real_auction_obj.id, 'aukcja_status')
-    assert auction_obj['thumbnail'] == thumbnails.by_id(real_auction_obj.id)
+    assert auction_obj['image_thumbnail'] == thumbnails.by_id(real_auction_obj.id)['image_thumbnail']

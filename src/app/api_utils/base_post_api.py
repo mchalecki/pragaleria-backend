@@ -23,6 +23,7 @@ class BasePostApi(Resource):
 
     def _build_post(self, parent, revision):
         data = revision or parent
+        image = thumbnails.by_id(parent.id)
         return {
             'id': parent.id,
             'title': data.post_title,
@@ -33,5 +34,6 @@ class BasePostApi(Resource):
             'auction_start': postmeta.by_key(parent.id, 'aukcja_start'),
             'auction_end': postmeta.by_key(parent.id, 'aukcja_end'),
             'auction_status': postmeta.by_key(parent.id, 'aukcja_status'),
-            'thumbnail': thumbnails.by_id(parent.id)
+            'image_original': image['image_original'],
+            'image_thumbnail': image['image_thumbnail']
         }

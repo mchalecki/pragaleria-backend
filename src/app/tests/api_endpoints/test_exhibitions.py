@@ -12,7 +12,7 @@ def test_all_auctions_satisfy_same_structure(client):
     obligatory_fields = [
         'id', 'description_content', 'guid',
         'date', 'auction_start', 'auction_end',
-        'auction_status', 'thumbnail'
+        'auction_status', 'image_thumbnail'
     ]
     assert all(
         key in obj.keys()
@@ -33,7 +33,7 @@ def test_if_the_original_post_is_always_returned(client):
         assert auction_obj['auction_start'] == postmeta.by_key(real_auction_obj.id, 'aukcja_start')
         assert auction_obj['auction_end'] == postmeta.by_key(real_auction_obj.id, 'aukcja_end')
         assert auction_obj['auction_status'] == postmeta.by_key(real_auction_obj.id, 'aukcja_status')
-        assert auction_obj['thumbnail'] == thumbnails.by_id(real_auction_obj.id)
+        assert auction_obj['image_thumbnail'] == thumbnails.by_id(real_auction_obj.id)['image_thumbnail']
 
     res = client.get('/api/exhibitions')
     data = json.loads(res.data.decode('utf-8'))

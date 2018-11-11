@@ -34,7 +34,9 @@ class TermDetails(Resource):
 
             artworks = map(self._get_author_artwork_from_post, relationships)
             if artworks:
-                result['artworks'] = list(artworks)
+                artworks = list(artworks)
+                result['image_thumbnail'] = artworks[0]['image_thumbnail']
+                result['artworks'] = artworks
 
             return result
 
@@ -73,7 +75,7 @@ class TermDetails(Resource):
 
             sold = postmeta.by_key(artwork_id, 'oferta_status')
             if sold and sold.isdigit():
-                result['description'] = bool(int(sold))
+                result['sold'] = bool(int(sold))
 
             initial_price = postmeta.by_key(artwork_id, 'oferta_cena')
             if initial_price:
@@ -87,8 +89,12 @@ class TermDetails(Resource):
             if year and year.isdigit():
                 result['year'] = int(year)
 
-            thumbnail = thumbnails.by_id(artwork_id)
-            if thumbnail:
-                result['thumbnail'] = thumbnail
+            image = thumbnails.by_id(artwork_id)
+            if image:
+                result['image_original'] = image['image_original']
+                result['image_thumbnail'] = image['image_thumbnail']
+            else:
+                result['image_original'] = ''
+                result['image_thumbnail'] = ''
 
         return result

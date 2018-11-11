@@ -39,7 +39,14 @@ class Catalog(Resource):
         if data[b'sprzedana']:
             auction_item['sold'] = bool(int(data[b'sprzedana'].decode()))
 
-        auction_item['thumbnail'] = thumbnails.by_id(item_id)
+        image = thumbnails.by_id(item_id)
+        if image:
+            auction_item['image_original'] = image['image_original']
+            auction_item['image_thumbnail'] = image['image_thumbnail']
+        else:
+            result['image_original'] = ''
+            result['image_thumbnail'] = ''
+
         auction_item['author'] = self._get_auction_item_author(item_id)
 
         return auction_item

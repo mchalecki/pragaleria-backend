@@ -37,15 +37,16 @@ class TermsList(Resource):
             relationships = models.TermRelationships.query.filter_by(
                 term_taxonomy_id=taxonomy.term_taxonomy_id).all()
             
-            thumbnail = ''
+            result = ''
             for artwork in relationships:
-                thumbnail = thumbnails.by_id(artwork.object_id)
-                if thumbnail:
+                image = thumbnails.by_id(artwork.object_id)
+                if image and image['image_thumbnail']:
+                    result = image['image_thumbnail']
                     break
             
             return {
                 'id': term.term_id,
                 'name': term.name,
                 'slug': term.slug,
-                'thumbnail': thumbnail
+                'thumbnail': result
             }

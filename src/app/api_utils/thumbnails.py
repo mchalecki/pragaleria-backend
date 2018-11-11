@@ -29,8 +29,8 @@ def by_id(item_id):
             thumbnail_url = get_thumbnail_url(thumbnail_metadata_decoded, full_size_url)
 
             return {
-                'original': f'{consts.PRAGALERIA_UPLOAD_URL}{full_size_url}',
-                'thumbnail':  f'{consts.PRAGALERIA_UPLOAD_URL}{thumbnail_url}'
+                'image_original': f'{consts.PRAGALERIA_UPLOAD_URL}{full_size_url}',
+                'image_thumbnail':  f'{consts.PRAGALERIA_UPLOAD_URL}{thumbnail_url}'
             }
 
     return {}
