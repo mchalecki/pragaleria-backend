@@ -1,0 +1,10 @@
+flask-restful
+flask
+codecov
+pytest
+pytest-cov
+flask-sqlalchemy
+pytest-flask
+pymysql
+sqlalchemy
+phpserialize

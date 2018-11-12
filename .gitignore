@@ -27,3 +27,4 @@ vendor/pkg/
 pyenv
 Vagrantfile
 db/init.sql
+env
