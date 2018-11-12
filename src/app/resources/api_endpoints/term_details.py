@@ -31,7 +31,7 @@ class TermDetails(Resource):
                 for artwork in artworks:
                     description = artwork.get('description', '')
                     dimensions = get_dimensions_from_description(description)
-                    artwork['dimensions'] = dimensions
+                    artwork["meta"] = {"dimension": dimensions}
             return result
 
     def _get_term_details(self, term_id):
