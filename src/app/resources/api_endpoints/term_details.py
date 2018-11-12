@@ -1,5 +1,6 @@
 from flask_restful import Resource, abort
 
+from app.api_utils.regex_utils import get_dimensions_from_description
 from app.models import models
 from app.api_utils import thumbnails, postmeta
 
@@ -16,17 +17,21 @@ class TermDetails(Resource):
     def build_object(self, term_id):
         term, relationships, taxonomy = self._get_term_details(term_id)
         if term and taxonomy and relationships and len(relationships) > 0:
-            result = {}
-            result['id'] = term_id
-            result['name'] = getattr(term, 'name', '')
-            result['slug'] = getattr(term, 'slug', '')
-            result['description'] = getattr(taxonomy, 'description', '')
             artworks = self._build_artworks(relationships)
-            result['artworks'] = artworks
-            result['image_thumbnail'] = ''
+            result = {
+                'id': term_id,
+                'name': getattr(term, 'name', ''),
+                'slug': getattr(term, 'slug', ''),
+                'description': getattr(taxonomy, 'description', ''),
+                'artworks': artworks,
+                'image_thumbnail': ''
+            }
             if len(artworks) > 0:
                 result['image_thumbnail'] = artworks[0]['image_thumbnail']
-
+                for artwork in artworks:
+                    description = artwork.get('description', '')
+                    dimensions = get_dimensions_from_description(description)
+                    artwork['dimensions'] = dimensions
             return result
 
     def _get_term_details(self, term_id):

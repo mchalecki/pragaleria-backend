@@ -1,8 +1,6 @@
-import re
-
-import phpserialize as php
 from flask_restful import Resource, abort
 
+from app.api_utils.regex_utils import get_dimensions_from_description
 from app.models import models
 from app.api_utils import postmeta, phpmeta, thumbnails
 
@@ -10,7 +8,6 @@ from app.api_utils import postmeta, phpmeta, thumbnails
 class Catalog(Resource):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.dimension_regex = re.compile(r"(\d+(,\d)?(\s?x\s?)?)+")
 
     def get(self, auction_id: str):
         catalog = self._get_auction_catalog(auction_id)
@@ -22,12 +19,8 @@ class Catalog(Resource):
         for data in phpmeta.to_dict(catalog).values():
             auction_item = self._build_auction_item(data)
             description = auction_item.get('description', '')
-            dimensions = self.dimension_regex.search(description)
-            if dimensions:
-                dimensions = dimensions.group()
-                dimensions = dimensions.replace(' ', '').split('x')
-                if len(dimensions) >= 2:
-                    auction_item["meta"] = {"dimension": dimensions}  # TODO add handling exceptions
+            dimensions = get_dimensions_from_description(description)
+            auction_item["meta"] = {"dimension": dimensions}
             result.append(auction_item)
         return result
 
