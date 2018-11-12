@@ -24,7 +24,6 @@ class TestCatalog:
 
 	def test_catalog_field_structure(self, client):
 		for auction in get_endpoint_result(client, '/api/auctions'):
-			print(auction)
 			catalog = get_endpoint_result(
 				client, '/api/catalog/{}'.format(auction['id'])
 			)
