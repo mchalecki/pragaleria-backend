@@ -32,7 +32,18 @@ class TermDetails(Resource):
             if hasattr(taxonomy, 'description'):
                 result['description'] = taxonomy.description
 
-            artworks = map(self._get_author_artwork_from_post, relationships)
+            artworks = []
+            titles = []
+            for artwork in relationships:
+                artwork_id = artwork.object_id
+                artwork_post = models.Posts.query.filter_by(
+                    id=artwork_id
+                ).first()
+                if artwork_post and hasattr(artwork_post, 'post_title'):
+                    if artwork_post.post_title not in titles:
+                        titles.append(artwork_post.post_title)
+                        artworks.append(self._get_author_artwork_from_post(artwork_post))
+
             if artworks:
                 artworks = list(artworks)
                 result['image_thumbnail'] = artworks[0]['image_thumbnail']
@@ -55,46 +66,41 @@ class TermDetails(Resource):
 
         return term, relationships, taxonomy
 
-    def _get_author_artwork_from_post(self, artwork):
-        artwork_id = artwork.object_id
-        artwork_post = models.Posts.query.filter_by(
-            id=artwork_id
-        ).first()
+    def _get_author_artwork_from_post(self, artwork_post):
+        artwork_id = artwork_post.id
 
         result = {}
 
-        if artwork_post:
+        result['id'] = artwork_id
 
-            result['id'] = artwork_id
+        if hasattr(artwork_post, 'post_title'):
+            result['title'] = artwork_post.post_title
 
-            if hasattr(artwork_post, 'post_title'):
-                result['title'] = artwork_post.post_title
+        if hasattr(artwork_post, 'post_content'):
+            result['description'] = artwork_post.post_content
 
-            if hasattr(artwork_post, 'post_content'):
-                result['description'] = artwork_post.post_content
+        sold = postmeta.by_key(artwork_id, 'oferta_status')
+        if sold and sold.isdigit():
+            result['sold'] = bool(int(sold))
 
-            sold = postmeta.by_key(artwork_id, 'oferta_status')
-            if sold and sold.isdigit():
-                result['sold'] = bool(int(sold))
+        initial_price = postmeta.by_key(artwork_id, 'oferta_cena')
+        if initial_price:
+            result['initial_price'] = initial_price
 
-            initial_price = postmeta.by_key(artwork_id, 'oferta_cena')
-            if initial_price:
-                result['initial_price'] = initial_price
+        sold_price = postmeta.by_key(artwork_id, 'oferta_cena_sprzedazy')
+        if sold_price:
+            result['sold_price'] = sold_price
 
-            sold_price = postmeta.by_key(artwork_id, 'oferta_cena_sprzedazy')
-            if sold_price:
-                result['sold_price'] = sold_price
+        year = postmeta.by_key(artwork_id, 'oferta_rok')
+        if year and year.isdigit():
+            result['year'] = int(year)
 
-            year = postmeta.by_key(artwork_id, 'oferta_rok')
-            if year and year.isdigit():
-                result['year'] = int(year)
-
-            image = thumbnails.by_id(artwork_id)
-            if image:
-                result['image_original'] = image['image_original']
-                result['image_thumbnail'] = image['image_thumbnail']
-            else:
-                result['image_original'] = ''
-                result['image_thumbnail'] = ''
+        image = thumbnails.by_id(artwork_id)
+        if image:
+            result['image_original'] = image['image_original']
+            result['image_thumbnail'] = image['image_thumbnail']
+        else:
+            result['image_original'] = ''
+            result['image_thumbnail'] = ''
 
         return result
