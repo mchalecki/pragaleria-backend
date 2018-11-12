@@ -26,7 +26,7 @@ def test_if_for_requested_page_size_all_pages_will_have_this_size_and_pagination
         i += 1
         if len(data) == 0:
             break
-        
+
         assert len(data) == 25
-        
+
     assert True

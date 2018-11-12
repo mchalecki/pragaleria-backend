@@ -1,14 +1,13 @@
 import json
 
 from app.models import models
-from app.resources.api_endpoints import auctions
 from app.api_utils import thumbnails, postmeta
 
 
 def test_all_auctions_satisfy_same_structure(client):
     res = client.get('/api/exhibitions')
     data = json.loads(res.data.decode('utf-8'))
-    
+
     obligatory_fields = [
         'id', 'description_content', 'guid',
         'date', 'auction_start', 'auction_end',
