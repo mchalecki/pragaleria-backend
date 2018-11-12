@@ -9,6 +9,9 @@ class Catalog(Resource):
     def get(self, auction_id:str):
         catalog = self._get_auction_catalog(auction_id)
 
+        if not catalog:
+            abort(404, message='Catalog for this auction does not exist. id: {}'.format(auction_id))
+
         result = []
         for data in phpmeta.to_dict(catalog).values():
             result.append(self._build_auction_item(data))
@@ -18,14 +21,26 @@ class Catalog(Resource):
         catalog = postmeta.by_key(auction_id, 'katalog')
         if catalog is None:
             auction = models.Posts.query.filter_by(id=auction_id).first()
-            catalog = postmeta.by_key(auction.post_parent, 'katalog')
+            if auction:
+                catalog = postmeta.by_key(auction.post_parent, 'katalog')
         return catalog
 
     def _build_auction_item(self, data):
-        item_id = data[b'id'].decode()
+        item_id = int(data[b'id'].decode())
         item_post = models.Posts.query.filter_by(id=item_id).first()
 
-        auction_item = {'id': item_id, 'title': item_post.post_title, 'description': item_post.post_content}
+        auction_item = {
+            'id': item_id,
+            'title': item_post.post_title,
+            'description': item_post.post_content,
+            'initial_price': '',
+            'sold_price': '',
+            'after_auction_price': '',
+            'sold': False,
+            'image_thumbnail': '',
+            'image_original': '',
+            'author': ''
+        }
 
         if data[b'cena_wywolawcza']:
             auction_item['initial_price'] = data[b'cena_wywolawcza'].decode()
@@ -43,9 +58,6 @@ class Catalog(Resource):
         if image:
             auction_item['image_original'] = image['image_original']
             auction_item['image_thumbnail'] = image['image_thumbnail']
-        else:
-            result['image_original'] = ''
-            result['image_thumbnail'] = ''
 
         auction_item['author'] = self._get_auction_item_author(item_id)
 
@@ -66,3 +78,5 @@ class Catalog(Resource):
                 return models.Terms.query.filter_by(
                     term_id=author.term_id
                 ).first().name
+
+        return ''

@@ -51,3 +51,9 @@ def test_if_no_duplicate_artworks(client):
 
 		artwork_titles = [artwork['title'] for artwork in author_details['artworks']]
 		assert len(artwork_titles) == len(set(artwork_titles))
+
+
+def test_404_if_author_does_not_exist(client):
+	res = client.get('/api/authors/9997')
+	data = json.loads(res.data.decode('utf-8'))
+	assert 'Author does not exist. id: 9997' in data['message']

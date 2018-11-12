@@ -6,15 +6,16 @@ from app.api_utils import thumbnails, postmeta
 
 class TermDetails(Resource):
     def get(self, term_id=None):
-        try:
-            if term_id is not None:
-                return self.build_object(term_id)
-        except Exception as e:
-            abort(404, message='Error querying TermDetails. {}'.format(e))
+        if term_id is not None:
+            author = self.build_object(term_id)
+            if author:
+                return author
+
+        abort(404, message='Author does not exist. id: {}'.format(term_id))
 
     def build_object(self, term_id):
         term, relationships, taxonomy = self._get_term_details(term_id)
-        if term and relationships and len(relationships) > 0:
+        if term and taxonomy and relationships and len(relationships) > 0:
             result = {}
             result['id'] = term_id
             result['name'] = getattr(term, 'name', '')
@@ -22,6 +23,7 @@ class TermDetails(Resource):
             result['description'] = getattr(taxonomy, 'description', '')
             artworks = self._build_artworks(relationships)
             result['artworks'] = artworks
+            result['image_thumbnail'] = ''
             if len(artworks) > 0:
                 result['image_thumbnail'] = artworks[0]['image_thumbnail']
 
@@ -34,9 +36,13 @@ class TermDetails(Resource):
         taxonomy = models.TermTaxonomies.query.filter_by(
             term_id=term_id,
         ).first()
-        relationships = models.TermRelationships.query.filter_by(
-            term_taxonomy_id=taxonomy.term_taxonomy_id
-        ).all()
+        if taxonomy:
+            relationships = models.TermRelationships.query.filter_by(
+                term_taxonomy_id=taxonomy.term_taxonomy_id
+            ).all()
+        else:
+            relationships = None
+
         return term, relationships, taxonomy
 
     def _build_artworks(self, artwork_candidates):
