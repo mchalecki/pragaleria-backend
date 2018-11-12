@@ -33,7 +33,10 @@ def by_id(item_id):
                 'image_thumbnail':  f'{consts.PRAGALERIA_UPLOAD_URL}{thumbnail_url}'
             }
 
-    return {}
+    return {
+        'image_original': '',
+        'image_thumbnail': ''
+    }
 
 
 def get_thumbnail_url(metadata, full_size_url):
