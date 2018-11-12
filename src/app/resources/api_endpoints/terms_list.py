@@ -24,7 +24,7 @@ class TermsList(Resource):
 
         if page_number == all_pages:
             return []
-        
+
         for taxonomy in author_query.limit(page_size).offset(offset_size):
             author = self._build_author(taxonomy)
             if author:
@@ -36,17 +36,17 @@ class TermsList(Resource):
         if term:
             relationships = models.TermRelationships.query.filter_by(
                 term_taxonomy_id=taxonomy.term_taxonomy_id).all()
-            
+
             result = ''
             for artwork in relationships:
                 image = thumbnails.by_id(artwork.object_id)
                 if image and image['image_thumbnail']:
                     result = image['image_thumbnail']
                     break
-            
+
             return {
                 'id': term.term_id,
                 'name': term.name,
                 'slug': term.slug,
-                'thumbnail': result
+                'image_thumbnail': result
             }
