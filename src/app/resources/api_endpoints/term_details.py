@@ -16,7 +16,12 @@ class TermDetails(Resource):
 
     def build_object(self, term_id):
         term, relationships, taxonomy = self._get_term_details(term_id)
-        if term and taxonomy and relationships and len(relationships) > 0:
+        if term and taxonomy:
+            result = {}
+            result['id'] = term_id
+            result['name'] = getattr(term, 'name', '')
+            result['slug'] = getattr(term, 'slug', '')
+            result['description'] = getattr(taxonomy, 'description', '')
             artworks = self._build_artworks(relationships)
             result = {
                 'id': term_id,
@@ -46,7 +51,7 @@ class TermDetails(Resource):
                 term_taxonomy_id=taxonomy.term_taxonomy_id
             ).all()
         else:
-            relationships = None
+            relationships = []
 
         return term, relationships, taxonomy
 

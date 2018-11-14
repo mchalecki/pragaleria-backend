@@ -6,7 +6,7 @@ from app.api_utils import thumbnails, postmeta
 
 
 class TermsList(Resource):
-    def get(self): # mozna przetestowac czy jest 404 jak bledne argumenty podaje
+    def get(self):
         try:
             page_number = int(request.args.get('page') or '0')
             page_size = int(request.args.get('size') or '20')
