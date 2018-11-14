@@ -26,7 +26,7 @@ class Catalog(Resource):
         return catalog
 
     def _build_auction_item(self, data):
-        item_id = int(data[b'id'].decode())
+        item_id = int(data['id'])
         item_post = models.Posts.query.filter_by(id=item_id).first()
 
         auction_item = {
@@ -42,17 +42,17 @@ class Catalog(Resource):
             'author': ''
         }
 
-        if data[b'cena_wywolawcza']:
-            auction_item['initial_price'] = data[b'cena_wywolawcza'].decode()
+        if data['cena_wywolawcza']:
+            auction_item['initial_price'] = data['cena_wywolawcza']
 
-        if data[b'cena_sprzedazy']:
-            auction_item['sold_price'] = data[b'cena_sprzedazy'].decode()
+        if data['cena_sprzedazy']:
+            auction_item['sold_price'] = data['cena_sprzedazy']
 
-        if data[b'cena_poaukcyjna']:
-            auction_item['after_auction_price'] = data[b'cena_poaukcyjna'].decode()
+        if data['cena_poaukcyjna']:
+            auction_item['after_auction_price'] = data['cena_poaukcyjna']
 
-        if data[b'sprzedana']:
-            auction_item['sold'] = bool(int(data[b'sprzedana'].decode()))
+        if data['sprzedana']:
+            auction_item['sold'] = bool(int(data['sprzedana']))
 
         image = thumbnails.by_id(item_id)
         if image:
