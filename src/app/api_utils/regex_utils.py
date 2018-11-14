@@ -1,7 +1,7 @@
 import re
 from typing import List
 
-dimension_regex = re.compile(r"\d+(,\d)?(\s?x\s?)\d+(,\d)?((\s?x\s?)\d+(,\d)?)?")
+dimension_regex = re.compile(r"\d+(,\d+)?(\s?x\s?)\d+(,\d+)?((\s?x\s?)\d+(,\d+)?)?")
 
 
 def get_dimensions_from_description(description: str) -> List[float]:
