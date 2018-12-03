@@ -2,7 +2,7 @@ from flask_restful import Resource, abort
 
 from app.api_utils.regex_utils import get_dimensions_from_description
 from app.models import models
-from app.api_utils import thumbnails, postmeta
+from app.api_utils import thumbnails, postmeta, html_utils
 
 
 class TermDetails(Resource):
@@ -17,17 +17,12 @@ class TermDetails(Resource):
     def build_object(self, term_id):
         term, relationships, taxonomy = self._get_term_details(term_id)
         if term and taxonomy:
-            result = {}
-            result['id'] = term_id
-            result['name'] = getattr(term, 'name', '')
-            result['slug'] = getattr(term, 'slug', '')
-            result['description'] = getattr(taxonomy, 'description', '')
             artworks = self._build_artworks(relationships)
             result = {
                 'id': term_id,
                 'name': getattr(term, 'name', ''),
                 'slug': getattr(term, 'slug', ''),
-                'description': getattr(taxonomy, 'description', ''),
+                'description': html_utils.clean(getattr(taxonomy, 'description', '')),
                 'artworks': artworks,
                 'image_thumbnail': ''
             }
@@ -75,7 +70,7 @@ class TermDetails(Resource):
 
         result['id'] = artwork_id
         result['title'] = getattr(artwork_post, 'post_title', '')
-        result['description'] = getattr(artwork_post, 'post_content', '')
+        result['description'] = html_utils.clean(getattr(artwork_post, 'post_content', ''))
         result['sold'] = bool(int(postmeta.by_key(artwork_id, 'oferta_status', '0')))
         result['initial_price'] = postmeta.by_key(artwork_id, 'oferta_cena', '')
         result['sold_price'] = postmeta.by_key(artwork_id, 'oferta_cena_sprzedazy', '')

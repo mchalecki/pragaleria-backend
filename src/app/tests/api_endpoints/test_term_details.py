@@ -67,16 +67,15 @@ def test_if_author_has_no_artworks_than_it_does_not_fail(client):
 		"name": "Małgorzata Warias /Małgorzata Fenrych/",
 		"slug": "malgorzata-warias-malgorzata-fenrych",
 		"description": (
-			"<p>Studiowała malarstwo pod kierunkiem prof. "
-			"Z. Grzywacza, następnie prof. S. Wiśniewskiego"
-			" oraz prof. A. Rzepki. Dyplom realizowała w "
-			"pracowni malarstwa sztalugowego na Wydziale "
-			"Architektury i Sztuk Pięknych Akademii im. A. "
-			"Frycza Modrzewskiego w Krakowie pod kierunkiem "
-			"prof. Ł. Konieczko. Autorka wystaw indywidualnych: "
-			"Salon Artystyczny Dettlofów (2005), Klub Kultury Paleta "
-			"(2005), Spokój i Cisza (2007) oraz uczestniczka kilku "
-			"wystaw zbiorowych.</p>"),
-			"artworks": [],
-			"image_thumbnail": ""
+			"Studiowała malarstwo pod kierunkiem prof. "
+			"Z. Grzywacza, następnie prof. S. Wiśniewskiego "
+			"oraz prof. A. Rzepki. Dyplom realizowała w pracowni malarstwa sztalugowego na Wydziale "
+			"Architektury i Sztuk Pięknych Akademii im. A. Frycza "
+			"Modrzewskiego w Krakowie pod kierunkiem prof. Ł. Konieczko. "
+			"Autorka wystaw indywidualnych: Salon Artystyczny Dettlofów "
+			"(2005), Klub Kultury Paleta (2005), Spokój i Cisza (2007) "
+			"oraz uczestniczka kilku wystaw zbiorowych."
+		),
+		"artworks": [],
+		"image_thumbnail": ""
 	}

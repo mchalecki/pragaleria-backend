@@ -2,7 +2,7 @@ import json
 
 from app.models import models
 from app.resources.api_endpoints import auctions
-from app.api_utils import thumbnails, postmeta
+from app.api_utils import thumbnails, postmeta, html_utils
 
 
 def test_all_auctions_satisfy_same_structure(client):
@@ -66,8 +66,8 @@ def test_if_when_there_exists_newer_revision_then_it_is_returned_instead(client)
 
     assert auction_obj['id'] == real_parent.id
     assert auction_obj['title'] == new_revision.post_title
-    assert auction_obj['description_content'] == new_revision.post_content
-    assert auction_obj['description_excerpt'] == new_revision.post_excerpt
+    assert auction_obj['description_content'] == html_utils.clean(new_revision.post_content)
+    assert auction_obj['description_excerpt'] == html_utils.clean(new_revision.post_excerpt)
     assert real_parent.post_name in auction_obj['guid']
     assert auction_obj['date'] == str(new_revision.post_modified)
     assert auction_obj['auction_start'] == postmeta.by_key(real_parent.id, 'aukcja_start')
@@ -97,8 +97,8 @@ def test_if_when_there_are_no_newer_revisions_then_original_post_is_returned(cli
 
     assert auction_obj['id'] == real_auction_obj.id
     assert auction_obj['title'] == real_auction_obj.post_title
-    assert auction_obj['description_content'] == real_auction_obj.post_content
-    assert auction_obj['description_excerpt'] == real_auction_obj.post_excerpt
+    assert auction_obj['description_content'] == html_utils.clean(real_auction_obj.post_content)
+    assert auction_obj['description_excerpt'] == html_utils.clean(real_auction_obj.post_excerpt)
     assert real_auction_obj.post_name in auction_obj['guid']
     assert auction_obj['date'] == str(real_auction_obj.post_modified)
     assert auction_obj['auction_start'] == postmeta.by_key(real_auction_obj.id, 'aukcja_start')

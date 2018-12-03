@@ -2,7 +2,7 @@ from flask_restful import Resource, abort
 
 from app.api_utils.regex_utils import get_dimensions_from_description
 from app.models import models
-from app.api_utils import postmeta, phpmeta, thumbnails
+from app.api_utils import postmeta, phpmeta, thumbnails, html_utils
 
 
 class Catalog(Resource):
@@ -39,7 +39,7 @@ class Catalog(Resource):
         auction_item = {
             'id': item_id,
             'title': item_post.post_title,
-            'description': item_post.post_content,
+            'description': html_utils.clean(item_post.post_content),
             'initial_price': '',
             'sold_price': '',
             'after_auction_price': '',

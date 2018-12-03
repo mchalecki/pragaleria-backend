@@ -5,7 +5,7 @@ from flask_restful import Resource, abort
 from app.models import models
 from consts import PRAGALERIA_AUCTIONS_URL
 
-from . import thumbnails, postmeta
+from . import thumbnails, postmeta, html_utils
 
 
 class BasePostApi(Resource):
@@ -26,8 +26,8 @@ class BasePostApi(Resource):
             return {
                 'id': parent_id,
                 'title': getattr(data, 'post_title', ''),
-                'description_content': getattr(data, 'post_content', ''),
-                'description_excerpt': getattr(data, 'post_excerpt', ''),
+                'description_content': html_utils.clean(getattr(data, 'post_content', '')),
+                'description_excerpt': html_utils.clean(getattr(data, 'post_excerpt', '')),
                 'guid': f'{consts.PRAGALERIA_AUCTIONS_URL}{parent.post_name}',
                 'date': str(getattr(data, 'post_modified', '')),
                 'auction_start': postmeta.by_key(parent.id, 'aukcja_start', ''),
