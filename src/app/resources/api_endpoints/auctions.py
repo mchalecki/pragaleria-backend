@@ -11,7 +11,8 @@ class Auctions(base_post_api.BasePostApi):
             ).order_by(models.Posts.post_modified.desc()).first()
             data = revision or parent
             if data.post_title and (data.post_excerpt or data.post_content):
-                result.append(self._build_post(parent, revision))
+                post = self._build_post(parent, revision)
+                post and result.append(post)
 
         return result
 

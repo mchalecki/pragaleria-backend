@@ -9,13 +9,14 @@ class Exhibitions(base_post_api.BasePostApi):
         result = []
         for parent in self._query_posts():
             if parent.post_title:
-                result.append(self._build_post(parent, parent))
+                post = self._build_post(parent, parent)
+                post and result.append(post)
 
         return result
 
     def _query_posts(self):
         return models.Posts.query.filter(
-            models.Posts.guid.like('%/aukcje-wystawy/%'),
+            models.Posts.guid.like('%aukcje-wystawy%'),
             models.Posts.post_status == 'publish',
             not_(models.Posts.post_name.like('%aukcja%'))
         ).order_by(models.Posts.post_modified.desc())
