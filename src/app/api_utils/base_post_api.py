@@ -22,7 +22,6 @@ class BasePostApi(Resource):
         parent_id = getattr(parent, 'id', '')
         if parent_id:
             data = revision or parent
-            image = thumbnails.by_id(parent_id)
             auction_start = postmeta.by_key(parent.id, 'aukcja_start', None)
             auction_end = postmeta.by_key(parent.id, 'aukcja_end', None)
 
@@ -37,6 +36,5 @@ class BasePostApi(Resource):
                     'auction_start': auction_start,
                     'auction_end': auction_end,
                     'auction_status': bool(int(postmeta.by_key(parent.id, 'aukcja_status', '0'))),
-                    'image_original': image['image_original'],
-                    'image_thumbnail': image['image_thumbnail']
+                    **thumbnails.by_id(parent_id)
                 }

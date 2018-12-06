@@ -44,9 +44,8 @@ class Catalog(Resource):
             'sold_price': '',
             'after_auction_price': '',
             'sold': False,
-            'image_thumbnail': '',
-            'image_original': '',
-            'author': ''
+            'author': '',
+            **thumbnails.by_id(item_id)
         }
 
         if data['cena_wywolawcza']:
@@ -60,11 +59,6 @@ class Catalog(Resource):
 
         if data['sprzedana']:
             auction_item['sold'] = bool(int(data['sprzedana']))
-
-        image = thumbnails.by_id(item_id)
-        if image:
-            auction_item['image_original'] = image['image_original']
-            auction_item['image_thumbnail'] = image['image_thumbnail']
 
         auction_item['author'] = self._get_auction_item_author(item_id)
 

@@ -41,12 +41,12 @@ class TermsList(Resource):
             for artwork in relationships:
                 image = thumbnails.by_id(artwork.object_id)
                 if image and image['image_thumbnail']:
-                    result = image['image_thumbnail']
+                    result = image
                     break
 
             return {
                 'id': term.term_id,
                 'name': term.name,
                 'slug': term.slug,
-                'image_thumbnail': result
+                **result
             }

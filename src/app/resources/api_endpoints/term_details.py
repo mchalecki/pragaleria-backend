@@ -66,18 +66,15 @@ class TermDetails(Resource):
     def _get_artwork_from_post(self, artwork_post):
         artwork_id = artwork_post.id
 
-        result = {}
-
-        result['id'] = artwork_id
-        result['title'] = getattr(artwork_post, 'post_title', '')
-        result['description'] = html_utils.clean(getattr(artwork_post, 'post_content', ''))
-        result['sold'] = bool(int(postmeta.by_key(artwork_id, 'oferta_status', '0')))
-        result['initial_price'] = postmeta.by_key(artwork_id, 'oferta_cena', '')
-        result['sold_price'] = postmeta.by_key(artwork_id, 'oferta_cena_sprzedazy', '')
-        result['year'] = postmeta.by_key(artwork_id, 'oferta_rok', '')
-
-        image = thumbnails.by_id(artwork_id)
-        result['image_original'] = image['image_original']
-        result['image_thumbnail'] = image['image_thumbnail']
+        result = {
+            'id': artwork_id,
+            'title': getattr(artwork_post, 'post_title', ''),
+            'description': html_utils.clean(getattr(artwork_post, 'post_content', '')),
+            'sold': bool(int(postmeta.by_key(artwork_id, 'oferta_status', '0'))),
+            'initial_price': postmeta.by_key(artwork_id, 'oferta_cena', ''),
+            'sold_price': postmeta.by_key(artwork_id, 'oferta_cena_sprzedazy', ''),
+            'year': postmeta.by_key(artwork_id, 'oferta_rok', ''),
+            **thumbnails.by_id(artwork_id)
+        }
 
         return result
