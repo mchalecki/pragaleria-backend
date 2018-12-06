@@ -8,7 +8,7 @@ from . import postmeta
 
 def by_id(item_id):
     thumbnail_id = postmeta.by_key(item_id, '_thumbnail_id', '')
-    full_size_url = postmeta.by_key(thumbnail_id, '_wp_attached_file')
+    full_size_url = postmeta.by_key(thumbnail_id, '_wp_attached_file', '')
     thumbnail_metadata = postmeta.by_key(thumbnail_id, '_wp_attachment_metadata')
 
     if full_size_url and thumbnail_metadata:
@@ -31,31 +31,31 @@ def get_thumbnail_url(metadata, full_size_url):
     if 'sizes' in metadata.keys():
         sizes = metadata['sizes']
 
-        thumbnail = sizes.get('thumbnail', None)
+        thumbnail = sizes.get('thumbnail', '')
         if thumbnail and 'file' in thumbnail.keys():
             _file = thumbnail['file']
             if _file:
                 result['image_thumbnail'] = consts.PRAGALERIA_UPLOAD_URL + static_part_of_url + _file
 
-        thumbnail = sizes.get('medium', None)
+        thumbnail = sizes.get('medium', '')
         if thumbnail and 'file' in thumbnail.keys():
             _file = thumbnail['file']
             if _file:
                 result['image_medium_thumbnail'] = consts.PRAGALERIA_UPLOAD_URL + static_part_of_url + _file
 
-        thumbnail = sizes.get('big-thumb', None)
+        thumbnail = sizes.get('big-thumb', '')
         if thumbnail and 'file' in thumbnail.keys():
             _file = thumbnail['file']
             if _file:
                 result['image_big_thumbnail'] = consts.PRAGALERIA_UPLOAD_URL + static_part_of_url + _file
 
-        thumbnail = sizes.get('medium_large', None)
+        thumbnail = sizes.get('medium_large', '')
         if thumbnail and 'file' in thumbnail.keys():
             _file = thumbnail['file']
             if _file:
                 result['image_medium'] = consts.PRAGALERIA_UPLOAD_URL + static_part_of_url + _file
 
-        thumbnail = sizes.get('large', None)
+        thumbnail = sizes.get('large', '')
         if thumbnail and 'file' in thumbnail.keys():
             _file = thumbnail['file']
             if _file:

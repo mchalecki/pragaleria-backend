@@ -104,4 +104,3 @@ def test_if_when_there_are_no_newer_revisions_then_original_post_is_returned(cli
     assert auction_obj['auction_start'] == postmeta.by_key(real_auction_obj.id, 'aukcja_start')
     assert auction_obj['auction_end'] == postmeta.by_key(real_auction_obj.id, 'aukcja_end')
     assert auction_obj['auction_status'] == bool(int(postmeta.by_key(real_auction_obj.id, 'aukcja_status', '0')))
-    assert auction_obj['image_thumbnail'] == thumbnails.by_id(real_auction_obj.id)['image_thumbnail']

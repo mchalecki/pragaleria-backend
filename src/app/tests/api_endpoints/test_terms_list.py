@@ -6,7 +6,6 @@ def test_if_for_requested_page_size_all_pages_will_have_this_size_and_pagination
         'id': int,
         'name': str,
         'slug': str,
-        'image_thumbnail': str,
     }
 
     i = 0

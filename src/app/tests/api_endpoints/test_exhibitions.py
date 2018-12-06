@@ -36,7 +36,6 @@ def test_if_the_original_post_and_not_revision_is_always_returned(client):
         assert auction_obj['auction_start'] == postmeta.by_key(real_auction_obj.id, 'aukcja_start')
         assert auction_obj['auction_end'] == postmeta.by_key(real_auction_obj.id, 'aukcja_end')
         assert auction_obj['auction_status'] == bool(int(postmeta.by_key(real_auction_obj.id, 'aukcja_status')))
-        assert auction_obj['image_thumbnail'] == thumbnails.by_id(real_auction_obj.id)['image_thumbnail']
 
     res = client.get('/api/exhibitions')
     data = json.loads(res.data.decode('utf-8'))
