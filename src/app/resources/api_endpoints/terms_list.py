@@ -1,5 +1,6 @@
 from flask import request
 from flask_restful import Resource, abort
+from sqlalchemy import or_
 
 from app.models import models
 from app.api_utils import thumbnails, postmeta
@@ -8,11 +9,39 @@ from app.api_utils import thumbnails, postmeta
 class TermsList(Resource):
     def get(self):
         try:
-            page_number = int(request.args.get('page') or '0')
-            page_size = int(request.args.get('size') or '20')
-            return self._build_data_list(page_number, page_size)
+            search_query = request.args.get('search', None)
+            if search_query:
+                return self._handle_search(search_query)
+            else:
+                page_number = int(request.args.get('page') or '0')
+                page_size = int(request.args.get('size') or '20')
+                return self._build_data_list(page_number, page_size)
         except Exception as e:
             abort(404, message='Error querying Terms. {}'.format(e))
+
+    def _handle_search(self, search_query):
+        if len(search_query) < 3:
+            return []
+
+        filter_like = f'%{search_query}%'
+        authors = models.Terms.query.filter(
+            or_(
+                models.Terms.name.like(filter_like),
+                models.Terms.slug.like(filter_like)
+            )
+        ).order_by(
+            models.Terms.slug
+        ).all()
+
+        result = []
+        for author in authors:
+            taxonomy = models.TermTaxonomies.query.filter_by(
+                term_id=author.term_id,
+                taxonomy='autor'
+            ).first()
+            if taxonomy:
+                result.append(self._build_author(taxonomy))
+        return result
 
     def _build_data_list(self, page_number, page_size):
         result = []
