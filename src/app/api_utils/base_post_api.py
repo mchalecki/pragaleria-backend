@@ -2,11 +2,12 @@ import consts
 
 from flask_restful import Resource
 
-from app.application import cache
+from app.api_utils.caching import cache
 from . import thumbnails, postmeta, html_utils
 
 
 class BasePostApi(Resource):
+    @cache.cached(timeout=30)
     def get(self):
         return self._build_data_list()
 

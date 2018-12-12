@@ -18,6 +18,7 @@ beautifulsoup4 = "*"
 gunicorn = "*"
 gevent = "*"
 flask-caching = "*"
+redis = "*"
 
 [dev-packages]
 

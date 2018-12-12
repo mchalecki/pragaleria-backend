@@ -3,7 +3,7 @@ from flask_restful import Resource, abort
 from sqlalchemy import or_
 
 from app.models import models
-from app.api_utils import thumbnails, postmeta
+from app.api_utils import thumbnails
 
 
 class TermsList(Resource):

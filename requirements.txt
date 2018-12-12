@@ -9,4 +9,4 @@ pymysql
 sqlalchemy
 phpserialize
 gunicorn
-flask-cache
+flask_caching
