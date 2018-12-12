@@ -8,3 +8,5 @@ pytest-flask
 pymysql
 sqlalchemy
 phpserialize
+gunicorn
+flask-cache

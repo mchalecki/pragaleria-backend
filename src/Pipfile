@@ -15,6 +15,8 @@ pymysql = "*"
 sqlalchemy = "*"
 phpserialize = "*"
 "beautifulsoup4" = "*"
+gunicorn = "*"
+gevent = "*"
 
 [dev-packages]
 
