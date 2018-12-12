@@ -33,3 +33,7 @@ services:
     container_name: nginx
     depends_on:
     - backend
+
+  redis:
+    image: redis
+    restart: unless-stopped

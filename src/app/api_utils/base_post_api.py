@@ -1,10 +1,8 @@
 import consts
 
-from flask_restful import Resource, abort
+from flask_restful import Resource
 
-from app.models import models
-from consts import PRAGALERIA_AUCTIONS_URL
-
+from app.application import cache
 from . import thumbnails, postmeta, html_utils
 
 

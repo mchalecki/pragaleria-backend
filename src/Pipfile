@@ -14,9 +14,10 @@ pytest-flask = "*"
 pymysql = "*"
 sqlalchemy = "*"
 phpserialize = "*"
-"beautifulsoup4" = "*"
+beautifulsoup4 = "*"
 gunicorn = "*"
 gevent = "*"
+flask-caching = "*"
 
 [dev-packages]
 
