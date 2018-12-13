@@ -42,5 +42,5 @@ services:
     volumes:
     - "./redis/redis.conf:/usr/local/etc/redis/redis.conf"
     - "./logs/redis:/var/log/redis"
-    command: redis-server /usr/local/etc/redis/redis.conf
+    command: /bin/bash -c "touch /var/log/redis/redis-server.log && chmod 777 /var/log/redis/redis-server.log && redis-server /usr/local/etc/redis/redis.conf"
     restart: unless-stopped
