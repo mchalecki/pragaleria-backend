@@ -2,11 +2,14 @@ from flask import request
 from flask_restful import Resource, abort
 from sqlalchemy import or_
 
+from app.api_utils.caching import cache
+from app.configs import current_config
 from app.models import models
 from app.api_utils import thumbnails
 
 
 class TermsList(Resource):
+    @cache.cached(timeout=current_config.CACHE_TIMEOUT)
     def get(self):
         try:
             search_query = request.args.get('search', None)

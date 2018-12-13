@@ -1,11 +1,14 @@
 from flask_restful import Resource, abort
 
+from app.api_utils.caching import cache
 from app.api_utils.regex_utils import get_dimensions_from_description
+from app.configs import current_config
 from app.models import models
 from app.api_utils import thumbnails, postmeta, html_utils
 
 
 class TermDetails(Resource):
+    @cache.cached(timeout=current_config.CACHE_TIMEOUT)
     def get(self, term_id=None):
         if term_id is not None:
             author = self.build_object(term_id)

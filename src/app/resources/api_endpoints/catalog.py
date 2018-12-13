@@ -1,6 +1,8 @@
 from flask_restful import Resource, abort
 
+from app.api_utils.caching import cache
 from app.api_utils.regex_utils import get_dimensions_from_description
+from app.configs import current_config
 from app.models import models
 from app.api_utils import postmeta, phpmeta, thumbnails, html_utils
 
@@ -9,6 +11,7 @@ class Catalog(Resource):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
+    @cache.cached(timeout=current_config.CACHE_TIMEOUT)
     def get(self, auction_id: str):
         catalog = self._get_auction_catalog(auction_id)
 
