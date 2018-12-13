@@ -18,3 +18,4 @@ max_requests = 1000
 loglevel = gunicorn_log_level()
 worker_class = 'gevent'
 workers = max_workers()
+errorlog = "/logs"
