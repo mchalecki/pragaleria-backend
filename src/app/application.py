@@ -1,18 +1,18 @@
-from pathlib import Path
-
+from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
-from app.config import app_config
-from app import app
 
-CONFIG_FILE_LOCATION = Path(__file__).parent / "config.py"
+from app.api_utils.caching import cache
+
 db = SQLAlchemy()
 
 
-def initialize_app(config_name):
-    app.config.from_object(app_config[config_name])
+def initialize_app(config):
+    app = Flask(__name__)
+    app.config.from_object(config)
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     db.init_app(app)
     _register_blueprints(app)
+    cache.init_app(app)
     return app
 
 
