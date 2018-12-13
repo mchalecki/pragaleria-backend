@@ -9,7 +9,6 @@ from app.api_utils import thumbnails
 
 
 class TermsList(Resource):
-    @cache.cached(timeout=current_config.CACHE_TIMEOUT)
     def get(self):
         try:
             search_query = request.args.get('search', None)
@@ -46,6 +45,7 @@ class TermsList(Resource):
                 result.append(self._build_author(taxonomy))
         return result
 
+    @cache.memoize(timeout=current_config.CACHE_TIMEOUT)
     def _build_data_list(self, page_number, page_size):
         result = []
         author_query = models.TermTaxonomies.query.filter_by(taxonomy='autor')
