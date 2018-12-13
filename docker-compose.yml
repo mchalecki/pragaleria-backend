@@ -6,7 +6,7 @@ services:
       - "8000:8000"
     volumes:
       - './src:/opt'
-      - './logs/gunicorn/errorlog.log:/logs'
+      - './logs/gunicorn:/logs'
     environment:
       - config=development
       - MYSQL_ROOT_PASSWORD=Password12#
@@ -41,6 +41,6 @@ services:
     image: redis
     volumes:
     - "./redis/redis.conf:/usr/local/etc/redis/redis.conf"
-    - "./logs/redis/redis-server.log:/var/log/redis/redis-server.log"
+    - "./logs/redis:/var/log/redis"
     command: redis-server /usr/local/etc/redis/redis.conf
     restart: unless-stopped
