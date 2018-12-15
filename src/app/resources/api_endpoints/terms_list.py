@@ -23,7 +23,7 @@ class TermsList(Resource):
 
     @staticmethod
     def _handle_search(search_query):
-        if len(search_query) < 2:
+        if len(search_query) < 3:
             return []
 
         filter_like = f'%{search_query.title()}%'
@@ -34,7 +34,6 @@ class TermsList(Resource):
         ).all()
 
         result = []
-        t8 = 0.
         for author in authors:
             taxonomy = models.TermTaxonomies.query.filter_by(
                 term_id=author.term_id,
