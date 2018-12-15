@@ -1,6 +1,6 @@
 from flask import request, current_app
 from flask_restful import Resource, abort
-from sqlalchemy import or_
+from sqlalchemy import or_, func
 
 from app.api_utils.caching import cache
 from app.configs import current_config
@@ -21,16 +21,14 @@ class TermsList(Resource):
         except Exception as e:
             abort(404, message='Error querying Terms. {}'.format(e))
 
-    def _handle_search(self, search_query):
+    @staticmethod
+    def _handle_search(search_query):
         if len(search_query) < 3:
             return []
 
-        filter_like = f'%{search_query}%'
+        filter_like = f'%{search_query.title()}%'
         authors = models.Terms.query.filter(
-            or_(
-                models.Terms.name.like(filter_like),
-                models.Terms.slug.like(filter_like)
-            )
+            models.Terms.name.like(func.binary(filter_like))
         ).order_by(
             models.Terms.slug
         ).all()
@@ -42,7 +40,7 @@ class TermsList(Resource):
                 taxonomy='autor'
             ).first()
             if taxonomy:
-                result.append(self._build_author(taxonomy))
+                result.append(TermsList._build_author(taxonomy))
         return result
 
     @staticmethod
