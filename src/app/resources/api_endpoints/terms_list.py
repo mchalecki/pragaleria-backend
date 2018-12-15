@@ -1,6 +1,6 @@
-from flask import request, current_app
+from flask import request
 from flask_restful import Resource, abort
-from sqlalchemy import or_, func
+from sqlalchemy import func
 
 from app.api_utils.caching import cache
 from app.configs import current_config
@@ -23,7 +23,7 @@ class TermsList(Resource):
 
     @staticmethod
     def _handle_search(search_query):
-        if len(search_query) < 3:
+        if len(search_query) < 2:
             return []
 
         filter_like = f'%{search_query.title()}%'
@@ -34,6 +34,7 @@ class TermsList(Resource):
         ).all()
 
         result = []
+        t8 = 0.
         for author in authors:
             taxonomy = models.TermTaxonomies.query.filter_by(
                 term_id=author.term_id,
@@ -63,22 +64,20 @@ class TermsList(Resource):
         return result
 
     @staticmethod
+    @cache.memoize(timeout=current_config.CACHE_TIMEOUT)
     def _build_author(taxonomy):
         term = models.Terms.query.filter_by(term_id=taxonomy.term_id).first()
         if term:
-            relationships = models.TermRelationships.query.filter_by(
-                term_taxonomy_id=taxonomy.term_taxonomy_id).all()
-
-            result = {}
-            for artwork in relationships:
-                image = thumbnails.by_id(artwork.object_id)
-                if image and image['image_thumbnail']:
-                    result = image
-                    break
-
-            return {
+            result = {
                 'id': term.term_id,
                 'name': term.name,
-                'slug': term.slug,
-                **result
+                'slug': term.slug
             }
+            artwork = models.TermRelationships.query.filter(
+                models.TermRelationships.term_taxonomy_id == taxonomy.term_taxonomy_id).first()
+            if artwork:
+                image = thumbnails.by_id(artwork.object_id)
+                if image and image['image_thumbnail']:
+                    result = {**result, **image}
+
+            return result

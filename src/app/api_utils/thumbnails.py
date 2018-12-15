@@ -13,7 +13,6 @@ def by_id(item_id):
 
     if full_size_url and thumbnail_metadata:
         thumbnail_metadata_decoded = phpmeta.to_dict(thumbnail_metadata)
-        thumbnail_url = get_thumbnail_url(thumbnail_metadata_decoded, full_size_url)
         return get_thumbnail_url(thumbnail_metadata_decoded, full_size_url)
 
     return {
