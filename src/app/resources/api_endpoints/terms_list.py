@@ -1,4 +1,4 @@
-from flask import request
+from flask import request, current_app
 from flask_restful import Resource, abort
 from sqlalchemy import or_
 
@@ -45,8 +45,9 @@ class TermsList(Resource):
                 result.append(self._build_author(taxonomy))
         return result
 
+    @staticmethod
     @cache.memoize(timeout=current_config.CACHE_TIMEOUT)
-    def _build_data_list(self, page_number, page_size):
+    def _build_data_list(page_number, page_size):
         result = []
         author_query = models.TermTaxonomies.query.filter_by(taxonomy='autor')
         number_of_authors = len(author_query.all())
@@ -58,12 +59,13 @@ class TermsList(Resource):
             return []
 
         for taxonomy in author_query.limit(page_size).offset(offset_size):
-            author = self._build_author(taxonomy)
+            author = TermsList._build_author(taxonomy)
             if author:
                 result.append(author)
         return result
 
-    def _build_author(self, taxonomy):
+    @staticmethod
+    def _build_author(taxonomy):
         term = models.Terms.query.filter_by(term_id=taxonomy.term_id).first()
         if term:
             relationships = models.TermRelationships.query.filter_by(
