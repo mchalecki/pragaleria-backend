@@ -1,3 +1,6 @@
+import time
+
+from flask import current_app, request
 from flask_restful import Resource, abort
 
 from app.api_utils.caching import cache
@@ -11,23 +14,33 @@ class Catalog(Resource):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-    @cache.cached(timeout=current_config.CACHE_TIMEOUT)
     def get(self, auction_id: str):
-        catalog = self._get_auction_catalog(auction_id)
-
+        catalog = Catalog._get_auction_catalog(auction_id)
         if not catalog:
             abort(404, message='Catalog for this auction does not exist. id: {}'.format(auction_id))
+        result = Catalog.generate_response(catalog)
+        sold = request.args.get('sold', None)
+        if sold:
+            if sold == 'true':
+                result = [i for i in result if i.get("sold", None) is True]
+            elif sold == 'false':
+                result = [i for i in result if i.get("sold", None) is False]
+        return result
 
+    @staticmethod
+    @cache.memoize(timeout=current_config.CACHE_TIMEOUT)
+    def generate_response(catalog):
         result = []
         for data in phpmeta.to_dict(catalog).values():
-            auction_item = self._build_auction_item(data)
+            auction_item = Catalog._build_auction_item(data)
             description = auction_item.get('description', '')
             dimensions = get_dimensions_from_description(description)
             auction_item["meta"] = {"dimension": dimensions}
             result.append(auction_item)
         return result
 
-    def _get_auction_catalog(self, auction_id):
+    @staticmethod
+    def _get_auction_catalog(auction_id):
         catalog = postmeta.by_key(auction_id, 'katalog')
         if catalog is None:
             auction = models.Posts.query.filter_by(id=auction_id).first()
@@ -35,7 +48,8 @@ class Catalog(Resource):
                 catalog = postmeta.by_key(auction.post_parent, 'katalog')
         return catalog
 
-    def _build_auction_item(self, data):
+    @staticmethod
+    def _build_auction_item(data):
         item_id = int(data['id'])
         item_post = models.Posts.query.filter_by(id=item_id).first()
 
@@ -63,7 +77,7 @@ class Catalog(Resource):
         if data['sprzedana']:
             auction_item['sold'] = bool(int(data['sprzedana']))
 
-        auction_item['author'] = self._get_auction_item_author(item_id)
+        auction_item['author'] = Catalog._get_auction_item_author(item_id)
 
         return auction_item
 
