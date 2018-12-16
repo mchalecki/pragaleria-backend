@@ -9,6 +9,7 @@ from . import thumbnails, postmeta, html_utils
 class BasePostApi(Resource):
     def get(self):
         return self._build_data_list()
+
     @staticmethod
     def _build_data_list():
         raise NotImplementedError
@@ -26,8 +27,6 @@ class BasePostApi(Resource):
             auction_end = postmeta.by_key(parent.id, 'aukcja_end', None)
 
             if auction_start and auction_end:
-                auction_start_datetime = datetime.strptime(auction_end, "%Y/%m/%d %H:%M")
-                # current_app.logger.debug(auction_start_datetime < datetime.now())
                 return {
                     'id': parent_id,
                     'title': html_utils.clean(getattr(data, 'post_title', '')),

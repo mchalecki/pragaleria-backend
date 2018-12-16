@@ -1,19 +1,31 @@
-import time
-
-from flask import current_app
+from datetime import datetime
+from flask import request, current_app
 
 from app.api_utils.base_post_api import BasePostApi
 from app.api_utils.caching import cache
 from app.configs import current_config
 from app.models import models
-from app.api_utils import base_post_api
 
 
 class Auctions(BasePostApi):
     @staticmethod
     def _build_data_list():
         result = Auctions._build_results()
+        past = request.args.get('past', False) == 'true'
+        future = request.args.get('future', False) == 'true'
+        if past or future:
+            return Auctions.filter_by_date_results(result, "auction_start", past)
         return result
+
+    @staticmethod
+    def filter_by_date_results(result, key, past):
+        filtered_results = []
+        for i in result:
+            auction_start_datetime = datetime.strptime(i[key], "%Y/%m/%d %H:%M")
+            is_past = auction_start_datetime < datetime.now()
+            if (past and is_past) or (not past and not is_past):
+                filtered_results.append(i)
+        return filtered_results
 
     @staticmethod
     @cache.cached(timeout=current_config.CACHE_TIMEOUT)
