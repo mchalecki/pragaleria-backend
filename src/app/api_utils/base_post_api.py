@@ -1,24 +1,24 @@
-import consts
+from datetime import datetime
 
 from flask_restful import Resource
 
-from app.configs import current_config
-from app.api_utils.caching import cache
+import consts
 from . import thumbnails, postmeta, html_utils
 
 
 class BasePostApi(Resource):
-    @cache.cached(timeout=current_config.CACHE_TIMEOUT)
     def get(self):
         return self._build_data_list()
-
-    def _build_data_list(self):
+    @staticmethod
+    def _build_data_list():
         raise NotImplementedError
 
-    def _query_posts(self):
+    @staticmethod
+    def _query_posts():
         raise NotImplementedError
 
-    def _build_post(self, parent, revision):
+    @staticmethod
+    def _build_post(parent, revision):
         parent_id = getattr(parent, 'id', '')
         if parent_id:
             data = revision or parent
@@ -26,6 +26,8 @@ class BasePostApi(Resource):
             auction_end = postmeta.by_key(parent.id, 'aukcja_end', None)
 
             if auction_start and auction_end:
+                auction_start_datetime = datetime.strptime(auction_end, "%Y/%m/%d %H:%M")
+                # current_app.logger.debug(auction_start_datetime < datetime.now())
                 return {
                     'id': parent_id,
                     'title': html_utils.clean(getattr(data, 'post_title', '')),

@@ -1,20 +1,23 @@
 from sqlalchemy import not_
 
+from app.api_utils.base_post_api import BasePostApi
 from app.models import models
 from app.api_utils import base_post_api
 
 
-class Exhibitions(base_post_api.BasePostApi):
-    def _build_data_list(self):
+class Exhibitions(BasePostApi):
+    @staticmethod
+    def _build_data_list():
         result = []
-        for parent in self._query_posts():
+        for parent in Exhibitions._query_posts():
             if parent.post_title:
-                post = self._build_post(parent, parent)
+                post = BasePostApi._build_post(parent, parent)
                 post and result.append(post)
 
         return result
 
-    def _query_posts(self):
+    @staticmethod
+    def _query_posts():
         return models.Posts.query.filter(
             models.Posts.guid.like('%aukcje-wystawy%'),
             models.Posts.post_status == 'publish',
