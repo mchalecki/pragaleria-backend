@@ -20,10 +20,14 @@ class TermDetails(Resource):
     def build_object(self, term_id):
         term, relationships, taxonomy = self._get_term_details(term_id)
         if term and taxonomy:
-            artworks = self._build_artworks(relationships)
+            term_name = getattr(term, 'name', '')
+            artworks = self._build_artworks(
+                artwork_candidates=relationships,
+                term_name=term_name
+            )
             result = {
                 'id': term_id,
-                'name': getattr(term, 'name', ''),
+                'name': term_name,
                 'slug': getattr(term, 'slug', ''),
                 'description': html_utils.clean(getattr(taxonomy, 'description', '')),
                 'artworks': artworks,
@@ -53,7 +57,7 @@ class TermDetails(Resource):
 
         return term, relationships, taxonomy
 
-    def _build_artworks(self, artwork_candidates):
+    def _build_artworks(self, artwork_candidates, term_name=''):
         artworks, titles = [], []
         for artwork in artwork_candidates:
             artwork_id = artwork.object_id
@@ -63,15 +67,21 @@ class TermDetails(Resource):
             if artwork_post and hasattr(artwork_post, 'post_title'):
                 if artwork_post.post_title not in titles:
                     titles.append(artwork_post.post_title)
-                    artworks.append(self._get_artwork_from_post(artwork_post))
+                    artworks.append(
+                        self._get_artwork_from_post(
+                            artwork_post=artwork_post,
+                            term_name=term_name
+                        )
+                    )
         return artworks
 
-    def _get_artwork_from_post(self, artwork_post):
+    def _get_artwork_from_post(self, artwork_post, term_name=''):
         artwork_id = artwork_post.id
 
         result = {
             'id': artwork_id,
             'title': getattr(artwork_post, 'post_title', ''),
+            'author': term_name,
             'description': html_utils.clean(getattr(artwork_post, 'post_content', '')),
             'sold': bool(int(postmeta.by_key(artwork_id, 'oferta_status', '0'))),
             'initial_price': postmeta.by_key(artwork_id, 'oferta_cena', ''),
