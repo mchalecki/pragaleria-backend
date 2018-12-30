@@ -31,11 +31,14 @@ class BasePostApi(Resource):
             auction_end = postmeta.by_key(parent.id, 'aukcja_end', None)
 
             if auction_start and auction_end:
+                data = html_utils.clean(getattr(data, 'post_excerpt', ''), True)
+                description_excerpt, urls = data if data else (None, None)
                 return {
                     'id': parent_id,
                     'title': html_utils.clean(getattr(data, 'post_title', '')),
                     'description_content': html_utils.clean(getattr(data, 'post_content', '')),
-                    'description_excerpt': html_utils.clean(getattr(data, 'post_excerpt', '')),
+                    'urls': urls,
+                    'description_excerpt': description_excerpt,
                     'guid': f'{consts.PRAGALERIA_AUCTIONS_URL}{parent.post_name}',
                     'date': str(getattr(data, 'post_modified', '')),
                     'is_current': BasePostApi.is_post_in_the_past(auction_end),
