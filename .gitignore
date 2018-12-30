@@ -6,6 +6,7 @@ logs/
 !.gitkeep
 __pycache__/
 .vagrant*
+.vscode/
 bin
 docker/docker
 .*.swp
@@ -25,6 +26,7 @@ docs/_templates
 bundles/
 .hg/
 .git/
+.ropeproject/
 vendor/pkg/
 pyenv
 Vagrantfile

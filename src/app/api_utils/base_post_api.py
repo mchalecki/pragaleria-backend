@@ -1,6 +1,4 @@
 from datetime import datetime
-
-from flask import request
 from flask_restful import Resource
 
 import consts
@@ -9,12 +7,7 @@ from . import thumbnails, postmeta, html_utils
 
 class BasePostApi(Resource):
     def get(self):
-        result = self._build_data_list()
-        past = request.args.get('past', False) == 'true'
-        future = request.args.get('future', False) == 'true'
-        if past or future:
-            return BasePostApi.filter_by_date_results(result, "auction_start", past)
-        return result
+        return self._build_data_list()
 
     @staticmethod
     def _build_data_list():
@@ -40,6 +33,7 @@ class BasePostApi(Resource):
                     'description_excerpt': html_utils.clean(getattr(data, 'post_excerpt', '')),
                     'guid': f'{consts.PRAGALERIA_AUCTIONS_URL}{parent.post_name}',
                     'date': str(getattr(data, 'post_modified', '')),
+                    'is_past': BasePostApi.is_post_in_past(auction_start),
                     'auction_start': auction_start,
                     'auction_end': auction_end,
                     'auction_status': bool(int(postmeta.by_key(parent.id, 'aukcja_status', '0'))),
@@ -47,11 +41,6 @@ class BasePostApi(Resource):
                 }
 
     @staticmethod
-    def filter_by_date_results(result, key, past):
-        filtered_results = []
-        for i in result:
-            auction_start_datetime = datetime.strptime(i[key], "%Y/%m/%d %H:%M")
-            is_past = auction_start_datetime < datetime.now()
-            if (past and is_past) or (not past and not is_past):
-                filtered_results.append(i)
-        return filtered_results
+    def is_post_in_past(date_string):
+        auction_start_datetime = datetime.strptime(date_string, "%Y/%m/%d %H:%M")
+        return auction_start_datetime < datetime.now()
