@@ -1,11 +1,14 @@
 from datetime import datetime
 from flask_restful import Resource
 
+from app.api_utils.caching import cache
+from app.configs import current_config
 import consts
 from . import thumbnails, postmeta, html_utils
 
 
 class BasePostApi(Resource):
+    @cache.cached(timeout=current_config.CACHE_TIMEOUT)
     def get(self):
         return sorted(
             self._build_data_list(),
