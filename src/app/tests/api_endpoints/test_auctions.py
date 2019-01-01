@@ -1,7 +1,6 @@
 import json
 
 from app.models import models
-from app.resources.api_endpoints import auctions
 from app.api_utils import thumbnails, postmeta, html_utils
 
 
@@ -17,6 +16,7 @@ def test_all_auctions_satisfy_same_structure(client):
         'auction_start': str,
         'auction_end': str,
         'is_current': bool,
+        'urls': dict,
         'image_thumbnail': str,
     }
 

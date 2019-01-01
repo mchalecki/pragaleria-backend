@@ -10,7 +10,7 @@ URLS_TEMPLATES = {
 
 def clean(source, urls=False):
     if not source:
-        return None if not urls else (None, {k: None for k in URLS_TEMPLATES})
+        return source if not urls else (source, {k: None for k in URLS_TEMPLATES})
     soup = BeautifulSoup(source, "html.parser")
     text = soup.get_text(separator='\n')
     text = '\n'.join(text.splitlines())
