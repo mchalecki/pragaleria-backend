@@ -31,8 +31,8 @@ class BasePostApi(Resource):
             auction_end = postmeta.by_key(parent.id, 'aukcja_end', None)
 
             if auction_start and auction_end:
-                data = html_utils.clean(getattr(data, 'post_excerpt', ''), True)
-                description_excerpt, urls = data if data else (None, None)
+                description = html_utils.clean(getattr(data, 'post_excerpt', ''), True)
+                description_excerpt, urls = description if description else (None, None)
                 return {
                     'id': parent_id,
                     'title': html_utils.clean(getattr(data, 'post_title', '')),

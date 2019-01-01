@@ -1,7 +1,6 @@
 import re
 
 from bs4 import BeautifulSoup
-from flask import current_app
 
 URLS_TEMPLATES = {
     'virtual_tour': 'wnetrza3d.pl/realizacje/pragaleria/',
