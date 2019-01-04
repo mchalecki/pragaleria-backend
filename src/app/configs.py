@@ -8,8 +8,10 @@ class Config:
     CACHE_TIMEOUT = 60
     CSRF_ENABLED = True
     SECRET = os.getenv('SECRET')
-    SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://root:{}@db/{}?charset=utf8&use_unicode=0'.format(
-        os.getenv('MYSQL_ROOT_PASSWORD'),
+    SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://{}:{}@{}/{}?charset=utf8&use_unicode=0'.format(
+        os.getenv('MYSQL_USER'),
+        os.getenv('MYSQL_PASSWORD'),
+        os.getenv('MYSQL_HOST'),
         os.getenv('MYSQL_DATABASE'),
     )
 
@@ -28,7 +30,7 @@ class TestingConfig(Config):
     GUNICORN_LOG_LEVEL = 'debug'
 
 
-class ProductionConfig(Config):
+class DeployConfig(Config):
     """Configuration for production"""
     DEBUG = False
     CACHE_TIMEOUT = 600
@@ -38,6 +40,6 @@ class ProductionConfig(Config):
 app_config = {
     'development': DevelopmentConfig,
     'testing': TestingConfig,
-    'production': ProductionConfig,
+    'deply': DeployConfig,
 }
 current_config = app_config[os.environ['config']]
