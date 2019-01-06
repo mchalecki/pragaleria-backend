@@ -62,6 +62,7 @@ class Catalog(Resource):
             'after_auction_price': '',
             'sold': False,
             'author': '',
+            'author_id': '',
             **thumbnails.by_id(item_id)
         }
 
@@ -77,7 +78,10 @@ class Catalog(Resource):
         if data['sprzedana']:
             auction_item['sold'] = bool(int(data['sprzedana']))
 
-        auction_item['author'] = Catalog._get_auction_item_author(item_id)
+        item_author = Catalog._get_auction_item_author(item_id)
+        if item_author:
+            auction_item['author_id'] = item_author.term_id
+            auction_item['author'] = item_author.name
 
         return auction_item
 
@@ -95,6 +99,6 @@ class Catalog(Resource):
             if author:
                 return models.Terms.query.filter_by(
                     term_id=author.term_id
-                ).first().name
+                ).first()
 
         return ''
