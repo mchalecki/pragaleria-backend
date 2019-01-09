@@ -78,12 +78,15 @@ class TermDetails(Resource):
     def _get_artwork_from_post(self, artwork_post, term_name=''):
         artwork_id = artwork_post.id
 
+        # sometimes artwork has postmeta "katalog" in which it was present
+        # this can help when displaying artist featured in auctions
+
         result = {
             'id': artwork_id,
             'title': getattr(artwork_post, 'post_title', ''),
             'author': term_name,
             'description': html_utils.clean(getattr(artwork_post, 'post_content', '')),
-            'sold': bool(int(postmeta.by_key(artwork_id, 'oferta_status', '0'))),
+            'sold': bool(int(postmeta.by_key(artwork_id, 'oferta_status', '1'))), #  if an artwork does not have this key then this means that information about it is only in the catalog, not in postmeta :/
             'initial_price': postmeta.by_key(artwork_id, 'oferta_cena', ''),
             'sold_price': postmeta.by_key(artwork_id, 'oferta_cena_sprzedazy', ''),
             'year': postmeta.by_key(artwork_id, 'oferta_rok', ''),
