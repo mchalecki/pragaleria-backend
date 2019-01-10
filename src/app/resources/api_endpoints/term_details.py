@@ -90,40 +90,35 @@ class TermDetails(Resource):
             'year': postmeta.by_key(artwork_id, 'oferta_rok', ''),
             **thumbnails.by_id(artwork_id),
         }
+        sold_info = self._get_artwork_from_postmeta(artwork_id)
 
-        sold = models.Postmeta.query.filter_by(
-            post_id=artwork_id,
-            meta_key='oferta_status'
-        ).first()
-        if sold:
-            result = {
-                **result,
+        return {
+            **result,
+            **sold_info
+        }
+
+    def _get_artwork_from_postmeta(self, artwork_id):
+        sold = postmeta.by_key(artwork_id, 'oferta_status', '')
+        initial_price = postmeta.by_key(artwork_id, 'oferta_cena', '')
+        sold_price = postmeta.by_key(artwork_id, 'oferta_cena_sprzedazy', '')
+
+        if all([sold, initial_price, sold_price]):
+            return {
                 'sold': string_to_bool(sold),
-                'initial_price': postmeta.by_key(artwork_id, 'oferta_cena', ''),
-                'sold_price': postmeta.by_key(artwork_id, 'oferta_cena_sprzedazy', ''),
+                'initial_price': initial_price,
+                'sold_price': sold_price
             }
         else:
-            data = models.Postmeta.query.filter(
+            catalog_data = models.Postmeta.query.filter(
+                models.Postmeta.meta_key == 'katalog',
                 models.Postmeta.meta_value.like(f'%{artwork_id}%')
-            ).first()  # TODO perhaps not only first
-            sold_info = {
-                # Defaults
-                'sold': True,
-                'initial_price': '',
-                'sold_price': '',
-            }
-            if data:
-                meta_val = to_dict(data.meta_value)
-                for d in meta_val.values():
-                    if isinstance(d, dict) and 'id' in d and d['id'] == str(artwork_id):
-                        sold_info = {
-                            'sold': d.get('sprzedana', 1),
-                            'initial_price': d.get('cena_wywolawcza', ''),
-                            'sold_price': d.get('cena_sprzedazy', '')
-                        }
-                        break
-                result = {
-                    **result,
-                    **sold_info
-                }
-        return result
+            ).first()
+
+            meta_val = to_dict(catalog_data.meta_value)
+            for d in meta_val.values():
+                if isinstance(d, dict) and 'id' in d and d['id'] == str(artwork_id):
+                    return {
+                        'sold': d.get('sprzedana', 0),
+                        'initial_price': d.get('cena_wywolawcza', ''),
+                        'sold_price': d.get('cena_sprzedazy', '')
+                    }
