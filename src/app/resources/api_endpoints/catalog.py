@@ -66,13 +66,13 @@ class Catalog(Resource):
             **thumbnails.by_id(item_id)
         }
 
-        if 'cena_wywolawcza' in data.keys():
+        if 'cena_wywolawcza' in data.keys() and data['cena_wywolawcza']:
             auction_item['initial_price'] = data['cena_wywolawcza']
-        if 'cena_poaukcyjna' in data.keys():
+        if 'cena_poaukcyjna' in data.keys() and data['cena_poaukcyjna']:
             auction_item['after_auction_price'] = data['cena_poaukcyjna']
-        if 'cena_sprzedazy' in data.keys():
+        if 'cena_sprzedazy' in data.keys() and data['cena_sprzedazy']:
             auction_item['sold_price'] = data['cena_sprzedazy']
-        if 'sprzedana' in data.keys():
+        if 'sprzedana' in data.keys() and data['sprzedana']:
             auction_item['sold'] = bool(int(data['sprzedana']))
 
         item_author = Catalog._get_auction_item_author(item_id)
