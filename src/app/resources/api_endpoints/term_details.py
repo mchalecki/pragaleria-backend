@@ -1,4 +1,4 @@
-from flask import current_app
+from flask import current_app, request
 from flask_restful import Resource, abort
 
 from app.api_utils.caching import cache
