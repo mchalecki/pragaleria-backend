@@ -10,7 +10,10 @@ class Auctions(BasePostApi):
             revision = models.Posts.query.filter_by(
                 post_parent=parent.id
             ).order_by(models.Posts.post_modified.desc()).first()
-            data = revision or parent
+            if revision and not revision.post_title.isdigit():
+                data = revision
+            else:
+                data = parent
             if data.post_title and (data.post_excerpt or data.post_content):
                 post = BasePostApi._build_post(parent, revision)
                 post and result.append(post)
@@ -18,10 +21,15 @@ class Auctions(BasePostApi):
 
     @staticmethod
     def _query_posts():
+        term_relationships_ids = [
+            _.object_id for _ in
+            models.TermRelationships.query.filter_by(
+                term_taxonomy_id='437' # aukcje
+            ).all()
+        ]
+
         return models.Posts.query.filter(
-            models.Posts.id != 18907,  # some fake post
-            models.Posts.guid.like('%aukcje-wystawy%'),
-            models.Posts.post_name.like('%aukcja%')
+            models.Posts.id.in_(term_relationships_ids)
         ).order_by(
             models.Posts.post_modified.desc()
-        )
+        ).all()

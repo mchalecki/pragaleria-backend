@@ -12,7 +12,6 @@ def test_all_auctions_satisfy_same_structure(client):
         'id': int,
         'description_content': str,
         'guid': str,
-        'date': str,
         'auction_start': str,
         'auction_end': str,
         'is_current': bool,
@@ -32,7 +31,6 @@ def test_if_the_original_post_and_not_revision_is_always_returned(client):
         assert auction_obj['description_content'] == real_auction_obj.post_content
         assert auction_obj['description_excerpt'] == real_auction_obj.post_excerpt
         assert real_auction_obj.post_name in auction_obj['guid']
-        assert auction_obj['date'] == str(real_auction_obj.post_modified)
         assert auction_obj['auction_start'] == postmeta.by_key(real_auction_obj.id, 'aukcja_start')
         assert auction_obj['auction_end'] == postmeta.by_key(real_auction_obj.id, 'aukcja_end')
 

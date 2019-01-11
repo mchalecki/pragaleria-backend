@@ -16,8 +16,15 @@ class Exhibitions(BasePostApi):
 
     @staticmethod
     def _query_posts():
+        term_relationships_ids = [
+            _.object_id for _ in
+            models.TermRelationships.query.filter_by(
+                term_taxonomy_id='438' # wystawy
+            ).all()
+        ]
+
         return models.Posts.query.filter(
-            models.Posts.guid.like('%aukcje-wystawy%'),
-            models.Posts.post_status == 'publish',
-            not_(models.Posts.post_name.like('%aukcja%'))
-        ).order_by(models.Posts.post_modified.desc())
+            models.Posts.id.in_(term_relationships_ids)
+        ).order_by(
+            models.Posts.post_modified.desc()
+        ).all()
