@@ -77,5 +77,6 @@ def test_if_author_has_no_artworks_than_it_does_not_fail(client):
 			"oraz uczestniczka kilku wystaw zbiorowych."
 		),
 		"artworks": [],
+		"catalogs": [],
 		"image_thumbnail": ""
 	}
