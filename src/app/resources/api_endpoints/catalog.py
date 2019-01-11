@@ -4,7 +4,7 @@ from flask import current_app, request
 from flask_restful import Resource, abort
 
 from app.api_utils.caching import cache
-from app.api_utils.regex_utils import get_dimensions_from_description
+from app.api_utils.string_utils import get_dimensions_from_description
 from app.configs import current_config
 from app.models import models
 from app.api_utils import postmeta, phpmeta, thumbnails, html_utils

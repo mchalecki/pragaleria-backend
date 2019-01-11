@@ -1,14 +1,16 @@
+from flask import current_app
 from flask_restful import Resource, abort
 
 from app.api_utils.caching import cache
-from app.api_utils.regex_utils import get_dimensions_from_description
+from app.api_utils.phpmeta import to_dict
+from app.api_utils.string_utils import get_dimensions_from_description, string_to_bool
 from app.configs import current_config
 from app.models import models
 from app.api_utils import thumbnails, postmeta, html_utils
 
 
 class TermDetails(Resource):
-    @cache.cached(timeout=current_config.CACHE_TIMEOUT)
+    # @cache.cached(timeout=current_config.CACHE_TIMEOUT)
     def get(self, term_id=None):
         if term_id is not None:
             author = self.build_object(term_id)
@@ -20,14 +22,13 @@ class TermDetails(Resource):
     def build_object(self, term_id):
         term, relationships, taxonomy = self._get_term_details(term_id)
         if term and taxonomy:
-            term_name = getattr(term, 'name', '')
             artworks = self._build_artworks(
                 artwork_candidates=relationships,
-                term_name=term_name
+                author=term
             )
             result = {
                 'id': term_id,
-                'name': term_name,
+                'name': getattr(term, 'name', ''),
                 'slug': getattr(term, 'slug', ''),
                 'description': html_utils.clean(getattr(taxonomy, 'description', '')),
                 'artworks': artworks,
@@ -57,7 +58,7 @@ class TermDetails(Resource):
 
         return term, relationships, taxonomy
 
-    def _build_artworks(self, artwork_candidates, term_name=''):
+    def _build_artworks(self, artwork_candidates, author=None):
         artworks, titles = [], []
         for artwork in artwork_candidates:
             artwork_id = artwork.object_id
@@ -70,27 +71,59 @@ class TermDetails(Resource):
                     artworks.append(
                         self._get_artwork_from_post(
                             artwork_post=artwork_post,
-                            term_name=term_name
+                            author=author
                         )
                     )
         return artworks
 
-    def _get_artwork_from_post(self, artwork_post, term_name=''):
-        artwork_id = artwork_post.id
-
+    def _get_artwork_from_post(self, artwork_post, author=None):
         # sometimes artwork has postmeta "katalog" in which it was present
         # this can help when displaying artist featured in auctions
+        artwork_id = artwork_post.id
+
+        author_id = getattr(author, 'term_id', '')
+        author_name = getattr(author, 'name', '')
 
         result = {
             'id': artwork_id,
             'title': getattr(artwork_post, 'post_title', ''),
-            'author': term_name,
+            'author_id': author_id,
+            'author': author_name,
             'description': html_utils.clean(getattr(artwork_post, 'post_content', '')),
-            'sold': bool(int(postmeta.by_key(artwork_id, 'oferta_status', '1'))), #  if an artwork does not have this key then this means that information about it is only in the catalog, not in postmeta :/
-            'initial_price': postmeta.by_key(artwork_id, 'oferta_cena', ''),
-            'sold_price': postmeta.by_key(artwork_id, 'oferta_cena_sprzedazy', ''),
             'year': postmeta.by_key(artwork_id, 'oferta_rok', ''),
-            **thumbnails.by_id(artwork_id)
+            **thumbnails.by_id(artwork_id),
+        }
+        sold_info = self._get_artwork_from_postmeta(artwork_id) or {}
+
+        return {
+            **result,
+            **sold_info
         }
 
-        return result
+    def _get_artwork_from_postmeta(self, artwork_id):
+        sold = postmeta.by_key(artwork_id, 'oferta_status', '0')
+        initial_price = postmeta.by_key(artwork_id, 'oferta_cena', '')
+        sold_price = postmeta.by_key(artwork_id, 'oferta_cena_sprzedazy', '')
+
+        if not all([sold, initial_price, sold_price]):
+            catalog_data = models.Postmeta.query.filter(
+                models.Postmeta.meta_key == 'katalog',
+                models.Postmeta.meta_value.like(f'%{artwork_id}%')
+            ).first()
+
+            if catalog_data:
+                meta_val = to_dict(catalog_data.meta_value)
+                for d in meta_val.values():
+                    if isinstance(d, dict) and 'id' in d and d['id'] == str(artwork_id):
+                        return {
+                            'sold': string_to_bool(d.get('sprzedana', '0')),
+                            'initial_price': d.get('cena_wywolawcza', ''),
+                            'sold_price': d.get('cena_sprzedazy', ''),
+                            'after_auction_price': d.get('cena_poaukcyjna', ''),
+                        }
+
+        return {
+            'sold': string_to_bool(sold),
+            'initial_price': initial_price,
+            'sold_price': sold_price
+        }

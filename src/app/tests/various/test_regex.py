@@ -1,4 +1,4 @@
-from app.api_utils.regex_utils import get_dimensions_from_description
+from app.api_utils.string_utils import get_dimensions_from_description
 
 
 def test_normal_painting_strings():
