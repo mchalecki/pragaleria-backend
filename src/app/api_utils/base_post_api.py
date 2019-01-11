@@ -10,8 +10,14 @@ from . import thumbnails, postmeta, html_utils
 class BasePostApi(Resource):
     @cache.cached(timeout=current_config.CACHE_TIMEOUT)
     def get(self):
+        return BasePostApi._sorted_by_date(
+            data_list=self._build_data_list()
+        )
+
+    @staticmethod
+    def _sorted_by_date(data_list):
         return sorted(
-            self._build_data_list(),
+            data_list,
             key=lambda auction: datetime.strptime(
                 auction['auction_end'], consts.DATE_FORMAT
             ), reverse=True
