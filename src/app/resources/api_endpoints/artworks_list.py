@@ -33,8 +33,9 @@ class ArtworksList(Resource):
         except Exception as e:
             abort(404, message='Error querying Artworks. {}'.format(e))
 
+    @staticmethod
     @cache.memoize(timeout=current_config.CACHE_TIMEOUT)
-    def _handle_tags_search(self, tags_query, search_query):
+    def _handle_tags_search(tags_query, search_query):
         if not tags_query.isdigit():
             return []
 
@@ -49,7 +50,7 @@ class ArtworksList(Resource):
         filter_like = f'%{search_query.title()}%'
         artworks = models.Posts.query.filter(
             models.Posts.post_title.like(func.binary(filter_like)),
-            models.Posts.post_type=='oferta',
+            models.Posts.post_type == 'oferta',
             models.Posts.guid.like('%/oferta/%'),
         ).order_by(
             models.Posts.post_name
@@ -65,7 +66,7 @@ class ArtworksList(Resource):
                 term_taxonomy_id=int(tags_query)
             ).first()
             if taxonomies:
-                artwork = self._get_artwork_from_post(artwork_m)
+                artwork = ArtworksList._get_artwork_from_post(artwork_m)
                 if artwork['title'] in titles:
                     index = titles.index(artwork['title'])
                     if artwork['id'] > indices[index]:
@@ -78,8 +79,9 @@ class ArtworksList(Resource):
                     result.append(artwork)
         return result
 
+    @staticmethod
     @cache.memoize(timeout=current_config.CACHE_TIMEOUT)
-    def _handle_tags(self, search_query, page_number, page_size):
+    def _handle_tags(search_query, page_number, page_size):
         # 12 malarstwo
         # 145 rzezba
         # 231 grafika-warsztatowa
@@ -111,7 +113,7 @@ class ArtworksList(Resource):
             post = models.Posts.query.filter_by(
                 id=artwork_m.object_id
             ).first()
-            artwork = self._get_artwork_from_post(post)
+            artwork = ArtworksList._get_artwork_from_post(post)
             if artwork['title'] in titles:
                 index = titles.index(artwork['title'])
                 if artwork['id'] > indices[index]:
@@ -125,15 +127,16 @@ class ArtworksList(Resource):
 
         return result
 
+    @staticmethod
     @cache.memoize(timeout=current_config.CACHE_TIMEOUT)
-    def _handle_search(self, search_query):
+    def _handle_search(search_query):
         if len(search_query) < 3:
             return []
 
         filter_like = f'%{search_query.title()}%'
         artworks = models.Posts.query.filter(
             models.Posts.post_title.like(func.binary(filter_like)),
-            models.Posts.post_type=='oferta',
+            models.Posts.post_type == 'oferta',
             models.Posts.guid.like('%/oferta/%'),
         ).order_by(
             models.Posts.post_name
@@ -144,7 +147,7 @@ class ArtworksList(Resource):
         indices = []
 
         for artwork_m in artworks:
-            artwork = self._get_artwork_from_post(artwork_m)
+            artwork = ArtworksList._get_artwork_from_post(artwork_m)
             if artwork['title'] in titles:
                 index = titles.index(artwork['title'])
                 if artwork['id'] > indices[index]:
@@ -157,12 +160,12 @@ class ArtworksList(Resource):
                 result.append(artwork)
         return result
 
+    @staticmethod
     @cache.memoize(timeout=current_config.CACHE_TIMEOUT)
-    def _build_data_list(self, page_number, page_size):
-        result = []
+    def _build_data_list(page_number, page_size):
 
         artwork_query = models.Posts.query.filter(
-            models.Posts.post_type=='oferta',
+            models.Posts.post_type == 'oferta',
             models.Posts.guid.like('%/oferta/%'),
         )
 
@@ -179,7 +182,7 @@ class ArtworksList(Resource):
         indices = []
 
         for artwork_m in artwork_query.limit(page_size).offset(offset_size):
-            artwork = self._get_artwork_from_post(artwork_m)
+            artwork = ArtworksList._get_artwork_from_post(artwork_m)
             if artwork['title'] in titles:
                 index = titles.index(artwork['title'])
                 if artwork['id'] > indices[index]:
@@ -193,7 +196,8 @@ class ArtworksList(Resource):
 
         return result
 
-    def _get_artwork_from_post(self, artwork_post):
+    @staticmethod
+    def _get_artwork_from_post(artwork_post):
         artwork_id = artwork_post.id
 
         taxonomies = models.TermRelationships.query.filter_by(
@@ -229,14 +233,15 @@ class ArtworksList(Resource):
             'year': postmeta.by_key(artwork_id, 'oferta_rok', ''),
             **thumbnails.by_id(artwork_id),
         }
-        sold_info = self._get_artwork_from_postmeta(artwork_id) or {}
+        sold_info = ArtworksList._get_artwork_from_postmeta(artwork_id) or {}
 
         return {
             **result,
             **sold_info
         }
 
-    def _get_artwork_from_postmeta(self, artwork_id):
+    @staticmethod
+    def _get_artwork_from_postmeta(artwork_id):
         sold = postmeta.by_key(artwork_id, 'oferta_status', '0')
         initial_price = postmeta.by_key(artwork_id, 'oferta_cena', '')
         sold_price = postmeta.by_key(artwork_id, 'oferta_cena_sprzedazy', '')

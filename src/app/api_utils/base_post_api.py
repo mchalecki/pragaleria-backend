@@ -16,9 +16,8 @@ class BasePostApi(Resource):
         return self._get_cached(period_filter_id, title_filter_id)
 
     @classmethod
+    @cache.memoize(timeout=current_config.CACHE_TIMEOUT)
     def _get_cached(cls, period_filter_id, title_filter_id):
-        # currently not cache requires each method to be cachable because in the end methods with self cannot be.
-        # TODO implement https://stackoverflow.com/questions/42721927/flask-cache-memoize-not-working-with-flask-restful-resources/42808800#42808800
         result = cls._build_data_list()
         result = BasePostApi._sort_by_date(data_list=result)
         result = BasePostApi._filter_by_date(result, period_filter_id)
