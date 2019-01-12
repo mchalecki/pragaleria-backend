@@ -22,7 +22,7 @@ class Exhibitions(BasePostApi):
         term_relationships_ids = [
             _.object_id for _ in
             models.TermRelationships.query.filter_by(
-                term_taxonomy_id='438' # wystawy
+                term_taxonomy_id='438'  # wystawy
             ).all()
         ]
 
