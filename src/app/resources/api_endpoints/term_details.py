@@ -35,7 +35,7 @@ class TermDetails(Resource):
                 'description': html_utils.clean(getattr(taxonomy, 'description', '')),
                 'artworks': artworks,
                 'image_thumbnail': '',
-                'catalogs': BasePostApi._sorted_by_date(self.featured_catalogs),
+                'catalogs': BasePostApi._sort_by_date(self.featured_catalogs),
             }
             if len(artworks) > 0:
                 result['image_thumbnail'] = artworks[0]['image_thumbnail']

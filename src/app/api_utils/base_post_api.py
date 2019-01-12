@@ -1,27 +1,66 @@
-from datetime import datetime
+from datetime import datetime, timedelta
+
+from flask import current_app, request
 from flask_restful import Resource
+from dateutil.relativedelta import relativedelta
 
 from app.api_utils.caching import cache
 from app.configs import current_config
 import consts
 from . import thumbnails, postmeta, html_utils
 
+PERIOD_TYPES = {
+    0: None,
+    1: relativedelta(months=1),
+    2: relativedelta(months=3),
+    3: relativedelta(months=6),
+    4: relativedelta(years=1)
+}
+
 
 class BasePostApi(Resource):
-    @cache.cached(timeout=current_config.CACHE_TIMEOUT)
     def get(self):
-        return BasePostApi._sorted_by_date(
-            data_list=self._build_data_list()
-        )
+        try:
+            period = int(request.args.get('period', 0))
+        except ValueError as _:
+            current_app.logger.error("Wrong period passed.")
+            period = 0
+        return self._get_cached(period)
+
+    @classmethod
+    def _get_cached(cls, period):
+        # currently not cache requires each method to be cachable because in the end methods with self cannot be.
+        # TODO implement https://stackoverflow.com/questions/42721927/flask-cache-memoize-not-working-with-flask-restful-resources/42808800#42808800
+        result = cls._build_data_list()
+        filtered = BasePostApi._filter_by_date(result, period)
+        sort = BasePostApi._sort_by_date(data_list=filtered)
+        return sort
 
     @staticmethod
-    def _sorted_by_date(data_list):
+    @cache.memoize(timeout=current_config.CACHE_TIMEOUT)
+    def _sort_by_date(data_list):
         return sorted(
             data_list,
             key=lambda auction: datetime.strptime(
                 auction['auction_end'], consts.DATE_FORMAT
             ), reverse=True
         )
+
+    @staticmethod
+    @cache.memoize(timeout=current_config.CACHE_TIMEOUT)
+    def _filter_by_date(data_list, period):
+        """
+        Filters based on date of evenrt and enum condition passed as argument
+        :param data_list: Events to sort
+        :param period: One of enum defined in PERIOD_TYPES
+        :return: Filtered data_list
+        """
+        period = PERIOD_TYPES.get(period, None)
+        if period:
+            now = datetime.now()
+            return [i for i in data_list if datetime.strptime(i['auction_end'], consts.DATE_FORMAT) + period > now]
+        else:
+            return data_list
 
     @staticmethod
     def _build_data_list():
