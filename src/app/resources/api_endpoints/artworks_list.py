@@ -219,6 +219,10 @@ class ArtworksList(Resource):
                 else:
                     tags.append(term.name)
 
+        description = html_utils.clean(getattr(artwork_post, 'post_content', ''))
+        dimensions = {}
+        if description:
+            dimensions = get_dimensions_from_description(description)
         result = {
             'id': artwork_id,
             'title': getattr(artwork_post, 'post_title', ''),
@@ -227,8 +231,10 @@ class ArtworksList(Resource):
             'tags': tags,
             'description': html_utils.clean(getattr(artwork_post, 'post_content', '')),
             'year': postmeta.by_key(artwork_id, 'oferta_rok', ''),
+            'meta': {'dimension': dimensions},
             **thumbnails.by_id(artwork_id),
         }
+
         sold_info = self._get_artwork_from_postmeta(artwork_id) or {}
 
         return {
