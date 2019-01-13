@@ -19,7 +19,7 @@ TITLE_FILTER_TYPES = {
     1: "Sztuk\w Młod\w+",
     2: "Sztuk\w Aktualn\w+",
     3: "Sztuk\w Współczesn\w+",
-    4: "Designu",
+    4: "Aukcja Design\w+",
     5: "Malarstwa i Designu",
     6: "Wakacyjna",
 }
