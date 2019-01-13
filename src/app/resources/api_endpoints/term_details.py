@@ -15,6 +15,7 @@ class TermDetails(Resource):
     def get(self, term_id=None):
         if term_id is not None:
             self.featured_catalogs = []
+            self.featured_catalogs_ids = []
             author = self.build_object(term_id)
             if author:
                 return author
@@ -135,4 +136,6 @@ class TermDetails(Resource):
             id=catalog_data.post_id
         ).first()
         catalog = BasePostApi._build_post(parent, parent)
-        catalog and self.featured_catalogs.append(catalog)
+        if catalog and catalog['id'] not in self.featured_catalogs_ids:
+            self.featured_catalogs_ids.append(catalog['id'])
+            self.featured_catalogs.append(catalog)
