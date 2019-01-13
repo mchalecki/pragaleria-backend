@@ -16,10 +16,10 @@ PERIOD_FILTER_TYPES = {
 
 TITLE_FILTER_TYPES = {
     0: None,
-    1: "Aukcja Sztuka Młoda",
-    2: "Aukcja Sztuka Aktualna",
-    3: "Aukcja Sztuki Współczesnej",
-    4: "Aukcja Designu",
-    5: "Aukcja Malarstwa i Designu",
+    1: "Sztuk\w Młod\w+",
+    2: "Sztuk\w Aktualn\w+",
+    3: "Sztuk\w Współczesn\w+",
+    4: "Designu",
+    5: "Malarstwa i Designu",
     6: "Wakacyjna",
 }

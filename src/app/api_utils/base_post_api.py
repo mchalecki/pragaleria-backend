@@ -1,3 +1,4 @@
+import re
 from datetime import datetime
 
 from flask import current_app, request
@@ -54,11 +55,9 @@ class BasePostApi(Resource):
     @cache.memoize(timeout=current_config.CACHE_TIMEOUT)
     def _filter_by_title(data_list, title_filter_id):
         title_filter = TITLE_FILTER_TYPES.get(title_filter_id, None)
-        current_app.logger.debug(title_filter_id)
-        current_app.logger.debug(title_filter)
-
         if title_filter:
-            return [i for i in data_list if title_filter in i['title']]
+            r = re.compile(title_filter)
+            return [i for i in data_list if r.search(i['title'])]
         else:
             return data_list
 
