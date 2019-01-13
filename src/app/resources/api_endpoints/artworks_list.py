@@ -50,8 +50,7 @@ class ArtworksList(Resource):
         filter_like = f'%{search_query.title()}%'
         artworks = models.Posts.query.filter(
             models.Posts.post_title.like(func.binary(filter_like)),
-            models.Posts.post_type == 'oferta',
-            models.Posts.guid.like('%/oferta/%'),
+            models.Posts.post_type == 'oferta'
         ).order_by(
             models.Posts.post_name
         )
@@ -139,7 +138,6 @@ class ArtworksList(Resource):
         artworks = models.Posts.query.filter(
             models.Posts.post_title.like(func.binary(filter_like)),
             models.Posts.post_type == 'oferta',
-            models.Posts.guid.like('%/oferta/%'),
         ).order_by(
             models.Posts.post_name
         )
@@ -167,8 +165,7 @@ class ArtworksList(Resource):
     def _build_data_list(page_number, page_size):
 
         artwork_query = models.Posts.query.filter(
-            models.Posts.post_type == 'oferta',
-            models.Posts.guid.like('%/oferta/%'),
+            models.Posts.post_type == 'oferta'
         )
 
         number_of_artworks = len(artwork_query.all())
