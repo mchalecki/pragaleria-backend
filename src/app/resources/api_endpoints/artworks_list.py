@@ -34,7 +34,7 @@ class ArtworksList(Resource):
             abort(404, message='Error querying Artworks. {}'.format(e))
 
     @staticmethod
-    @cache.memoize(timeout=current_config.CACHE_TIMEOUT)
+    # @cache.memoize(timeout=current_config.CACHE_TIMEOUT)
     def _handle_tags_search(tags_query, search_query):
         if not tags_query.isdigit():
             return []
@@ -80,8 +80,8 @@ class ArtworksList(Resource):
         return result
 
     @staticmethod
-    @cache.memoize(timeout=current_config.CACHE_TIMEOUT)
-    def _handle_tags(search_query, page_number, page_size):
+    # @cache.memoize(timeout=current_config.CACHE_TIMEOUT)
+    def _handle_tags(tags_query, page_number, page_size):
         # 12 malarstwo
         # 145 rzezba
         # 231 grafika-warsztatowa
@@ -89,21 +89,23 @@ class ArtworksList(Resource):
         # 235 grafika-wektorowa
         # 1385 ceramika
 
-        if not search_query.isdigit():
+        if not tags_query.isdigit():
             return []
 
-        search_query = int(search_query)
+        tags_query = int(tags_query)
 
-        if search_query not in [12, 145, 231, 233, 235, 1385]:
+        if tags_query not in [12, 145, 231, 233, 235, 1385]:
             return []
 
         artwork_query = models.TermRelationships.query.filter_by(
-            term_taxonomy_id=int(search_query)
+            term_taxonomy_id=int(tags_query)
         )
         number_of_artworks = len(artwork_query.all())
         all_pages = number_of_artworks // page_size
-        page_number = max(min(page_number, all_pages), 0)
         offset_size = page_number * page_size
+
+        if page_number > all_pages:
+            return []
 
         result = []
         titles = []
@@ -128,7 +130,7 @@ class ArtworksList(Resource):
         return result
 
     @staticmethod
-    @cache.memoize(timeout=current_config.CACHE_TIMEOUT)
+    # @cache.memoize(timeout=current_config.CACHE_TIMEOUT)
     def _handle_search(search_query):
         if len(search_query) < 3:
             return []
@@ -161,7 +163,7 @@ class ArtworksList(Resource):
         return result
 
     @staticmethod
-    @cache.memoize(timeout=current_config.CACHE_TIMEOUT)
+    # @cache.memoize(timeout=current_config.CACHE_TIMEOUT)
     def _build_data_list(page_number, page_size):
 
         artwork_query = models.Posts.query.filter(
