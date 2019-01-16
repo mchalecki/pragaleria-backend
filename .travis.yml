@@ -15,7 +15,7 @@ before_deploy:
   - docker tag pragaleriabackend_backend:latest $REGISTRY_USER/pragaleriabackend
   - docker push $REGISTRY_USER/pragaleriabackend
 deploy:
-  - eval "$(ssh-agent -s)"
-  - chmod 600 deploy
-  - ssh-add deploy
-  - ssh -i deploy rootie@167.99.246.28 'bash -s' < deploy.sh
+  provider: script
+  script: ./deploy.sh $SERVER_USER $SERVER_IP deploy
+  on:
+    branch: master
