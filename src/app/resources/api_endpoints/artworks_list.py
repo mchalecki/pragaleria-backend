@@ -34,7 +34,7 @@ class ArtworksList(Resource):
             abort(404, message='Error querying Artworks. {}'.format(e))
 
     @staticmethod
-    # @cache.memoize(timeout=current_config.CACHE_TIMEOUT)
+    @cache.memoize(timeout=current_config.CACHE_TIMEOUT)
     def _handle_tags_search(tags_query, search_query):
         if not tags_query.isdigit():
             return []
@@ -79,7 +79,7 @@ class ArtworksList(Resource):
         return result
 
     @staticmethod
-    # @cache.memoize(timeout=current_config.CACHE_TIMEOUT)
+    @cache.memoize(timeout=current_config.CACHE_TIMEOUT)
     def _handle_tags(tags_query, page_number, page_size):
         # 12 malarstwo
         # 145 rzezba
@@ -129,7 +129,7 @@ class ArtworksList(Resource):
         return result
 
     @staticmethod
-    # @cache.memoize(timeout=current_config.CACHE_TIMEOUT)
+    @cache.memoize(timeout=current_config.CACHE_TIMEOUT)
     def _handle_search(search_query):
         if len(search_query) < 3:
             return []
@@ -161,7 +161,7 @@ class ArtworksList(Resource):
         return result
 
     @staticmethod
-    # @cache.memoize(timeout=current_config.CACHE_TIMEOUT)
+    @cache.memoize(timeout=current_config.CACHE_TIMEOUT)
     def _build_data_list(page_number, page_size):
 
         artwork_query = models.Posts.query.filter(
