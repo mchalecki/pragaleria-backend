@@ -41,6 +41,6 @@ class DeployConfig(Config):
 app_config = {
     'development': DevelopmentConfig,
     'testing': TestingConfig,
-    'deply': DeployConfig,
+    'deploy': DeployConfig,
 }
 current_config = app_config[os.environ['config']]
