@@ -8,11 +8,12 @@ class Config:
     CACHE_TIMEOUT = 60
     CSRF_ENABLED = True
     SECRET = os.getenv('SECRET')
-    SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://{}:{}@{}/{}?charset=utf8&use_unicode=0'.format(
-        os.getenv('MYSQL_USER'),
-        os.getenv('MYSQL_PASSWORD'),
-        os.getenv('MYSQL_HOST'),
-        os.getenv('MYSQL_DATABASE'),
+    SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://{user}:{password}@{host}:{port}/{db}?charset=utf8&use_unicode=0'.format(
+        user=os.getenv('MYSQL_USER'),
+        password=os.getenv('MYSQL_PASSWORD'),
+        host=os.getenv('MYSQL_HOST'),
+        port=os.getenv('MYSQL_PORT'),
+        db=os.getenv('MYSQL_DATABASE')
     )
 
 
