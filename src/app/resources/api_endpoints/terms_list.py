@@ -47,7 +47,11 @@ class TermsList(Resource):
     @cache.memoize(timeout=current_config.CACHE_TIMEOUT)
     def _build_data_list(page_number, page_size):
         result = []
-        author_query = models.TermTaxonomies.query.filter_by(taxonomy='autor')
+        author_query = models.TermTaxonomies.query.filter_by(
+            taxonomy='autor'
+        ).order_by(
+            models.TermTaxonomies.term_id.desc()
+        )
         number_of_authors = len(author_query.all())
         all_pages = number_of_authors // page_size
         page_number = max(min(page_number, all_pages), 0)
